@@ -1,0 +1,98 @@
+﻿═══════════════════════════════════════════════════════════════════════════════════════════════════
+HACKSPHERE TEAM DATA EXPORT
+Generated: 29/1/2026, 10:33:54 pm
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+TOTAL TEAMS,4
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+PROBLEM STATEMENT DISTRIBUTION
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+Problem Statement,Teams Count,Percentage
+Not Selected,4,100.0%
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+STATE-WISE DISTRIBUTION
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+State,Teams Count,Percentage
+Maharashtra,4,100.0%
+
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+DISTRICT-WISE DISTRIBUTION
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+District,Teams Count,Percentage
+Solapur,3,75.0%
+Ahmednagar,1,25.0%
+
+
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+TEAM DETAILS
+═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+Column Key: Role,Name,Phone,Email,Institute,District,State
+
+───────────────────────────────────────────────────────────────────────────────────────────────────
+TEAM 1: spanda
+───────────────────────────────────────────────────────────────────────────────────────────────────
+Institute:,Spanda (SP0001)
+Location:,Solapur,"Maharashtra"
+Problem:,Not Selected
+Mentor:,Ananad Sir,spanda5@gmail.com
+SPOC:,Ananad Sir,spanda5@gmail.com
+Approved:,2026-01-29
+
+Role,Name,Phone,Email
+
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────
+TEAM 2: Innovation Squad
+───────────────────────────────────────────────────────────────────────────────────────────────────
+Institute:,MITVPU (MIT001)
+Location:,Ahmednagar,"Maharashtra"
+Problem:,Not Selected
+Mentor:,Aanand Shimpi,ananad@gmail.com
+SPOC:,Aanand Shimpi,ananad@gmail.com
+Approved:,2026-01-23
+
+Role,Name,Phone,Email
+
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────
+TEAM 3: Teeet
+───────────────────────────────────────────────────────────────────────────────────────────────────
+Institute:,test (Test)
+Location:,Solapur,"Maharashtra"
+Problem:,Not Selected
+Mentor:,MMM,MMM
+SPOC:,MMM,MMM
+Approved:,2026-01-13
+
+Role,Name,Phone,Email
+L (Leader),Anand,N/A,shimpi.anand@mitvpu.ac.in
+M1 (Member),1,N/A,a1@gmail.com
+M2 (Member),2,N/A,shimpi.anand@mitvpus.ac.in
+M3 (Member),3,N/A,c1@gmail.com
+M4 (Member),4,N/A,d1@gmail.com
+
+
+
+───────────────────────────────────────────────────────────────────────────────────────────────────
+TEAM 4: TestWar
+───────────────────────────────────────────────────────────────────────────────────────────────────
+Institute:,MIT (MIT)
+Location:,Solapur,"Maharashtra"
+Problem:,Not Selected
+Mentor:,spoc,S@gmail.com
+SPOC:,spoc,S@gmail.com
+Approved:,2026-01-13
+
+Role,Name,Phone,Email
+L (Leader),Anand,N/A,anand02cs004@gmail.com
+M1 (Member),1,N/A,aanandshimpi@gmail.com
+M2 (Member),2,N/A,b@gmail.com
+M3 (Member),3,N/A,c@gmail.com
+M4 (Member),4,N/A,d@gmail.com
+
+

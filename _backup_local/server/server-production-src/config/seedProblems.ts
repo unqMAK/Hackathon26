@@ -1,0 +1,84 @@
+import Problem from '../models/Problem';
+
+const problems = [
+    {
+        "_id": "693589418e427b64eaaec308",
+        "title": "Final Hackathon Problem Statement (One-Liner)",
+        "description": "Final Hackathon Problem Statement (One-Liner)\nDesign and develop an AI-enabled Smart Road Damage Reporting and Management System for Solapur Municipal Corporation that enables citizens to report road issues instantly while providing SMC officials with real-time tools for verification, prioritization, resource allocation, and quick resolution.\nSmart Road Damage Reporting & Rapid Response System for Solapur Municipal Corporation\nContext\nSolapur city frequently faces road damage, potholes, and cracks, especially after heavy rains, ongoing construction, and underground utility works. These issues create major safety risks, disrupt traffic, and lead to citizen dissatisfaction.Currently, SMC lacks a centralized, real-time, technology-driven mechanism to detect, verify, prioritize, and resolve road-related complaints efficiently.\nThe Problem\nThe Solapur Municipal Corporation (SMC) needs an integrated digital solution that can:\n1. Detect & Report Road Damage Efficiently\nCitizens face difficulties reporting potholes, cracks, and road breakages.\nCommunication gaps between departments slow down repairs.\nNo visual, geo-tagged or time-stamped system exists for verification.\n2. Coordinate Multi-Departmental Actions\nRoad damage often results from:\nHeavy rain & flooding\nOngoing construction works\nUnderground utility repairs (water, drainage, telecom, electric)\nPoor-quality materials\nHeavy traffic load\nMultiple departments (Engineering, Disaster Management, Traffic, Ward Offices) are involved, but no unified workflow exists.\n3. Enable Real-Time Monitoring & Accountability\nCitizens do not receive timely status updates.\nOfficials lack dashboards to track complaints, delays, or contractor accountability.\nManual processes cause inefficiency and poor transparency.\nHackathon Challenge (What You Must Build)\nHow might we create a Smart, Real-Time Road Damage Reporting and Monitoring System that:\nCitizen Side\nAllows citizens to easily report road damage using photo/video evidence, auto geo-tagging, timestamps, and short descriptions.\nSupports reporting through mobile app, web portal, or WhatsApp bot.\nEnables users to track the status of their complaints.\nSMC Administration Side\nAutomatically categorizes and prioritizes complaints using severity detection (AI preferred).\nCreates a centralized dashboard for officials to assign, monitor, and close tasks.\nIntegrates with SMC departments and contractors for workflow automation.\nSends updates to citizens at each stage.\nMaintains historical and predictive analytics for road maintenance planning.\nAdvanced (Bonus) Features\nAI-based pothole detection from CCTV/traffic feeds.\nPredictive analytics for identifying high-risk areas.\nIntegration with Disaster Management System (DMA Act compliance).\nHeatmaps for tracking road damage across the city.\nExpected Outcomes\nA functional solution that:\nStrengthens citizen–government engagement.\nProvides a faster, transparent, and accountable complaint resolution cycle.\nUses modern technologies (AI, GIS, ML, Automation).\nSupports SMC's vision of a Smart, Safe, and Efficient Urban Infrastructure.",
+        "category": "General",
+        "difficulty": "Medium",
+        "tags": [],
+        "type": "Software"
+    },
+
+    {
+        "_id": "693589418e427b64eaaec30a",
+        "title": "Smart Water Pressure Management for Equitable Water Supply in Solapur",
+        "description": "Problem Statement Title:\nSmart Water Pressure Management for Equitable Water Supply in Solapur\nBackground\nSolapur Municipal Corporation (SMC) provides drinking water to more than 10 lakh residents across multiple distribution zones.Despite continuous efforts, several challenges persist:\nLow water pressure in elevated or tail-end areas\nUneven distribution across zones\nIrregular supply timings\nSignificant water loss due to leakages, aging pipelines, and manual valve operations\nLack of real-time data, causing delayed response and inefficient planning\nSince the existing system uses largely manual processes and lacks modern monitoring tools, SMC requires a smart, automated, and data-driven approach to ensure equitable water access for all citizens.\nChallenge\nDevelop a technological solution that enables SMC to monitor, analyze, and maintain optimal water pressure across its distribution network to ensure fair, transparent, and efficient water supply.\nYour solution should aim to:\nDetect and analyze pressure variations in real-time\nUsing IoT sensors, flow meters, or software-based analytics.\nIdentify leakages, bursts, or unauthorized consumption\nThrough anomaly detection or pattern analysis.\nOptimize valve and pump operations\nUsing predictive models, scheduling algorithms, or automated controls.\nEnsure fair distribution across all zones\nEspecially in high-altitude and rapidly growing localities.\nProvide a scalable, cost-effective system\nCompatible with SMC's existing water infrastructure.\nExpected Outcomes\nParticipants should deliver:\nA smart water pressure monitoring dashboard\nPowered by IoT, sensors, GIS mapping, or AI-based analytics.\nPredictive analytics model\nTo forecast pressure drops, peak demand, or potential leak points.\nUser-friendly mobile/web interface\nFor municipal engineers; citizen interface is optional but encouraged.\nPolicy and operational recommendations\nFor long-term smart water governance, automation, and sustainability.\nEvaluation Criteria\nSolutions will be assessed on:\nInnovation and technical feasibility\nCost-effectiveness and ability to scale city-wide\nEase of integration with existing SMC infrastructure\nImpact on equitable and sustainable water supply\nUser experience and practical applicability",
+        "category": "Smart Water",
+        "difficulty": "Medium",
+        "tags": ["Water Management", "IoT"],
+        "type": "Software"
+    },
+    {
+        "_id": "693589418e427b64eaaec30b",
+        "title": "Smart Safety & Assistance System for Sanitation Workers",
+        "description": "Title:\nSmart Safety & Assistance System for Sanitation Workers\nBackground\nSanitation workers of Solapur Municipal Corporation (SMC) work under highly challenging and hazardous conditions. Their daily tasks involve:\nExposure to extreme weather (heat, rain, wind)\nEntry into dangerous manholes, sewer lines, and blocked pipelines\nPerforming high-risk manual operations\nHealth risks due to toxic gases, infections, and unsafe surroundings\nDespite being essential to public health and hygiene, sanitation workers often lack modern tools, safety mechanisms, and technology support.\nTo promote dignity, safety, and efficiency, SMC requires innovative solutions that protect workers from life-threatening conditions.\nChallenge\nDesign a technology-driven safety and support system that minimizes risks for sanitation workers and enhances safe working conditions.\nYour solution should aim to:\nReduce direct human exposure\nThrough smart tools, wearable safety devices, or semi-automation.\nPrevent loss of life or injury\nDetecting and alerting about toxic gases, structural risks, or flooding in manholes.\nEnsure health-friendly working environment\nSensors, real-time monitoring, protective gear innovations.\nProvide modern, safer alternatives to manual work\nRobotics, mechanized cleaning tools, remote inspection devices, or AI-based monitoring.\nExpected Outcomes\nParticipants should produce:\nPrototype of a safety monitoring system\nGas sensors, smart wearables, panic alert buttons, automated logs.\nSmart equipment or tool design\nFor cleaning, inspection, or maintenance without direct manual entry.\nMobile or web dashboard for supervisors\nTo track worker safety, location, and emergency alerts.\nOperational roadmap\nGuidelines for reducing manual scavenging risks and improving worker safety standards.\nEvaluation Criteria\nInnovation & practical usability\nImpact on worker safety and life protection\nFeasibility and cost-effectiveness for SMC\nIntegration with existing municipal workflows\nScalability to cover all sanitation workers",
+        "category": "Healthcare",
+        "difficulty": "Medium",
+        "tags": ["Healthcare", "Wellness"],
+        "type": "Software"
+    },
+    {
+        "_id": "693589418e427b64eaaec30c",
+        "title": "Smart Traffic & Parking Management System for Solapur City",
+        "description": "Smart Traffic & Parking Management System for Solapur City\nBackground\nSolapur is experiencing rapid urban growth, leading to:\nHigh traffic congestion at major junctions like bus stands, railway stations, markets, schools, malls, and hospitals.\nObstructed traffic flow due to hawkers, improper parking, and unregulated roadside activities.\nLack of scientific planning, real-time data, and digital tools for traffic management.\nIncreased delays, accidents, pollution, and inconvenience for citizens.\nTo build a smarter, safer city, SMC requires a modern, technology-driven traffic and parking management system.\nChallenge\nDevelop a Smart Traffic & Parking Management Solution that improves mobility, reduces congestion, and enhances road safety across Solapur.\nYour solution should aim to:\n1. Manage Traffic Flow Efficiently\nReal-time monitoring of congestion zones\nDynamic signal control systems\nRoute optimization for peak hours\n2. Detect and Resolve Obstructions\nIdentify hawkers, illegal parking, roadside vendors\nNotify enforcement teams automatically\nGeo-mapping of frequent bottlenecks\n3. Improve Parking Management\nSmart parking availability detection (IoT/AI)\nDigital parking reservation systems\nMapping of legal vs illegal parking areas\n4. Support Data-Driven Decision Making\nHeatmaps of traffic density\nPredictive analytics (events, school hours, market days)\nTraffic load planning based on time, zone, or season\n5. Integrate with SMC Systems\nPolice and municipal control rooms\nExisting CCTV network\nPublic dashboards or mobile app for citizens\nExpected Outcomes\nParticipants should deliver:\nPrototype dashboard for real-time traffic monitoring & parking analytics\nIoT/AI-driven congestion detection model\nParking recommendation or allocation system\nMobile/web platform for citizens and traffic authorities\nPolicy recommendations for long-term mobility planning\nEvaluation Criteria\nInnovation and technical feasibility\nAbility to reduce congestion and improve mobility\nIntegration with SMC infrastructure (CCTV, GIS, signals)\nUser-centric design for citizens & authorities\nCost-effectiveness and scalability",
+        "category": "Smart City",
+        "difficulty": "Medium",
+        "tags": ["Smart City", "Traffic", "Infrastructure"],
+        "type": "Software"
+    },
+    {
+        "_id": "693589418e427b64eaaec30d",
+        "title": "Hackathon Problem Statement: Smart Health for Solapur",
+        "description": "Hackathon Problem Statement: Smart Health for Solapur\nContext\nSolapur Municipal Corporation (SMC) serves a rapidly expanding urban population with diverse healthcare needs. While several public health initiatives are ongoing, the city continues to face critical challenges such as:\nUnequal access to healthcare services across zones\nDelayed detection and response to disease outbreaks\nLack of integrated health data across hospitals and diagnostic centers\nLimited public awareness regarding preventive healthcare\nInadequate digital tools for citizen engagement\nPoor real-time visibility of public health infrastructure\nThe COVID-19 pandemic further emphasized the importance of real-time, technology-driven healthcare solutions that can strengthen both preventive and responsive healthcare systems.\nProblem Statement\nDesign and develop innovative, technology-driven solutions that address key healthcare challenges within Solapur Municipal Corporation.Your solution should improve accessibility, efficiency, transparency, and citizen engagement across the public healthcare ecosystem.\nParticipants may choose one or more of the following challenge areas:\nKey Challenge Areas\n1. Urban Health Data Integration\nDevelop systems for real-time data collection, standardization, and analytics by integrating data from hospitals, clinics, diagnostic labs, and government health programs.\n2. Predictive Disease Surveillance\nUse AI/ML or statistical models to track communicable diseases, predict outbreaks, and map vulnerable populations or high-risk zones.\n3. Smart Citizen Health Services\nBuild digital platforms offering:\nOnline doctor appointments\nTelemedicine services\nVaccination alerts\nAmbulance tracking\nEmergency response coordination\n4. Maternal & Child Health Tracking\nCreate tools for monitoring:\nMaternal health indicators\nChild nutrition (0–6 years)\nImmunization schedules and coverage\nWard-wise health performance dashboards\n5. Public Health Infrastructure Monitoring\nDevelop IoT, GIS, or AI-based systems to track:\nEquipment condition\nBed availability\nMedicine stocks\nFacility utilization\nOutpatient demand patterns\n6. Awareness & Behavior Change\nDesign digital campaigns, gamified tools, or interactive platforms to promote:\nHygiene and sanitation\nPreventive health practices\nLifestyle disease awareness\nMental health well-being\nExpected Outcome\nParticipants should develop a prototype or working model that SMC can pilot for improving:\nUrban healthcare delivery\nCitizen satisfaction\nDecision-making through data\nHealth-related emergency response\nTransparency and accountability in public health services\nEvaluation Parameters\nSolutions will be evaluated based on:\nInnovation & Technical Excellence\nFeasibility for Municipal-Level Deployment\nCitizen-Centric Design & Inclusiveness\nUse of Emerging Technologies (AI, IoT, GIS, Cloud, etc.)\nImpact on Public Health Outcomes & Governance",
+        "category": "Healthcare",
+        "difficulty": "Medium",
+        "tags": ["Healthcare", "Wellness"],
+        "type": "Software"
+    }
+];
+
+/**
+ * Seeds problem statements to MongoDB on server startup.
+ * Only adds problems that don't already exist (checks by _id).
+ * This function is safe to call on every server start.
+ */
+export const seedProblemsOnStartup = async (): Promise<void> => {
+    try {
+        console.log('--- Auto-seeding Problem Statements ---');
+
+        let created = 0;
+        let skipped = 0;
+
+        for (const problem of problems) {
+            const existing = await Problem.findById(problem._id);
+            if (existing) {
+                skipped++;
+            } else {
+                await Problem.create(problem);
+                console.log(`✅ Problem "${problem.title}" created.`);
+                created++;
+            }
+        }
+
+        if (created > 0) {
+            console.log(`📚 Seeding complete: ${created} new problem(s) added, ${skipped} already existed.`);
+        } else {
+            console.log(`📚 All ${skipped} problem statement(s) already exist in database.`);
+        }
+    } catch (error) {
+        console.error('❌ Error seeding problems:', error);
+        // Don't throw - allow server to continue even if seeding fails
+    }
+};

@@ -1,0 +1,29 @@
+{
+    // Suppress TailwindCSS at-rule warnings
+    "css.lint.unknownAtRules": "ignore",
+    "scss.lint.unknownAtRules": "ignore",
+    "less.lint.unknownAtRules": "ignore",
+    // Enable TailwindCSS IntelliSense
+    "files.associations": {
+        "*.css": "tailwindcss"
+    },
+    // Enable autocomplete in CSS strings
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    // Keep CSS validation enabled
+    "css.validate": true,
+    // Enable TailwindCSS Emmet completions
+    "tailwindCSS.emmetCompletions": true,
+    // TailwindCSS IntelliSense settings
+    "tailwindCSS.experimental.classRegex": [
+        [
+            "cva\\(([^)]*)\\)",
+            "[\"'`]([^\"'`]*).*?[\"'`]"
+        ],
+        [
+            "cn\\(([^)]*)\\)",
+            "(?:'|\"|`)([^']*)(?:'|\"|`)"
+        ]
+    ]
+}
