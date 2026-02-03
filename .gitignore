@@ -29,3 +29,10 @@ dist/
 *.zip
 *.tar.gz
 *.zip
+
+# Environment files
+.env
+.env.*
+server/.env
+server/.env.*
+_backup_local/
