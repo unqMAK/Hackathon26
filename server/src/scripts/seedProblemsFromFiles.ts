@@ -30,7 +30,7 @@ Road damage may occur due to heavy rainfall and flooding, construction and excav
 • Manual and paper-based processes reduce transparency and efficiency.`,
         difficulty: "Hard",
         tags: ["AI", "GIS", "Mobile App", "Infrastructure", "IoT"],
-        type: "Software"
+        type: "Both"
     },
     {
         title: "Smart Health Solutions for Solapur Municipal Corporation",
@@ -62,7 +62,7 @@ Solapur Municipal Corporation requires a unified digital health ecosystem to add
 • Manual processes reduce efficiency, transparency, and accountability.`,
         difficulty: "Medium",
         tags: ["Healthcare", "AI", "Telemedicine", "Analytics", "Public Health"],
-        type: "Software"
+        type: "Both"
     },
     {
         title: "Smart Water Pressure Management for Equitable Water Supply in Solapur Municipal Corporation",
@@ -91,7 +91,7 @@ Solapur Municipal Corporation requires an integrated, intelligent water manageme
 • Limited analytical tools for demand forecasting and planning.`,
         difficulty: "Hard",
         tags: ["IoT", "Sensors", "Analytics", "Water Management", "Automation"],
-        type: "Hardware"
+        type: "Both"
     },
     {
         title: "Smart Safety and Assistance System for Sanitation Workers of Solapur Municipal Corporation",
@@ -120,7 +120,7 @@ Solapur Municipal Corporation requires a comprehensive safety and support system
 • Limited visibility for supervisors during field operations.`,
         difficulty: "Hard",
         tags: ["IoT", "Safety", "Wearables", "Robotics", "Health"],
-        type: "Hardware"
+        type: "Both"
     },
     {
         title: "Smart Traffic and Parking Management System for Solapur Municipal Corporation",
@@ -153,7 +153,7 @@ Solapur Municipal Corporation requires an integrated mobility management platfor
 • Limited use of predictive insights for planning during school hours, market days, festivals, or public events.`,
         difficulty: "Medium",
         tags: ["AI", "Traffic", "IoT", "Smart Parking", "Analytics"],
-        type: "Software"
+        type: "Both"
     }
 ];
 

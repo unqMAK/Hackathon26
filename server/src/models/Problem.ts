@@ -6,7 +6,7 @@ export interface IProblem extends Document {
     category: string;
     difficulty: 'Easy' | 'Medium' | 'Hard';
     tags: string[];
-    type: 'Software' | 'Hardware';
+    type: 'Software' | 'Hardware' | 'Both';
 }
 
 const ProblemSchema: Schema = new Schema({
@@ -24,8 +24,8 @@ const ProblemSchema: Schema = new Schema({
     },
     type: {
         type: String,
-        enum: ['Software', 'Hardware'],
-        default: 'Software'
+        enum: ['Software', 'Hardware', 'Both'],
+        default: 'Both'
     }
 }, {
     timestamps: true

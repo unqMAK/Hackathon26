@@ -6,6 +6,7 @@ interface Announcement {
     _id: string;
     title: string;
     message: string;
+    link?: string;
     type: 'info' | 'warning' | 'urgent' | 'general';
     createdAt: string;
 }
@@ -87,11 +88,8 @@ const AnnouncementTicker = () => {
                     const typeStyle = getTypeStyles(announcement.type);
                     const Icon = typeStyle.icon;
 
-                    return (
-                        <div
-                            key={`${announcement._id}-${index}`}
-                            className="inline-flex items-center mx-8"
-                        >
+                    const content = (
+                        <>
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-white/20 mr-2">
                                 <Icon className="h-3.5 w-3.5 mr-1" />
                                 <span className="text-xs font-medium uppercase">{announcement.type}</span>
@@ -99,6 +97,25 @@ const AnnouncementTicker = () => {
                             <span className="font-semibold mr-2">{announcement.title}:</span>
                             <span className="opacity-90">{announcement.message}</span>
                             <span className="mx-8 text-white/40">•</span>
+                        </>
+                    );
+
+                    return announcement.link ? (
+                        <a
+                            key={`${announcement._id}-${index}`}
+                            href={announcement.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center mx-8 hover:opacity-80 transition-opacity cursor-pointer"
+                        >
+                            {content}
+                        </a>
+                    ) : (
+                        <div
+                            key={`${announcement._id}-${index}`}
+                            className="inline-flex items-center mx-8"
+                        >
+                            {content}
                         </div>
                     );
                 })}

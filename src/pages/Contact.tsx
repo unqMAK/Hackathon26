@@ -44,8 +44,8 @@ const Contact = () => {
     {
       icon: Phone,
       title: 'Call Us',
-      value: '+91 2137 305000',
-      link: 'tel:+912137305000'
+      value: '+91 849 684 9849',
+      link: 'tel:+918496849849'
     },
     {
       icon: MapPin,
@@ -276,7 +276,7 @@ const Contact = () => {
             Find Us Here
           </h3>
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3802.3254621815626!2d75.8394!3d17.6599!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc5da90e3d9cf13%3A0x8e9cf4e4f0e8d8b5!2sMIT%20Vishwaprayag%20University!5e0!3m2!1sen!2sin!4v1703678400000!5m2!1sen!2sin"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3802.5!2d75.8568019!3d17.7125163!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bc5d154eaa3b59b%3A0xcfd3c5cd91a27d87!2sMIT%20Vishwaprayag%20University!5e0!3m2!1sen!2sin!4v1703678400000!5m2!1sen!2sin"
             width="100%"
             height="400"
             style={{ border: 0, borderRadius: '1rem' }}

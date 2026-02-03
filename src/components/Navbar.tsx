@@ -33,7 +33,7 @@ const Navbar = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Problem Statements', path: '/problem-statements' },
-    { name: 'Guidelines', path: '/guidelines' },
+    { name: 'Resources', path: '/guidelines' },
     { name: 'SPOC Info', path: '/spoc-info' },
     { name: 'Project Implementation', path: '/project-implementation' },
     { name: 'FAQs', path: '/faqs' },

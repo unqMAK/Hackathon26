@@ -14,7 +14,10 @@ import {
     rejectPasswordReset,
     adminResetUserPassword,
     exportTeamsCSVFlat,
-    exportTeamsCSVStructured
+    exportTeamsCSVStructured,
+    getProblemSelectionLock,
+    setProblemSelectionLock,
+    getTeamSelections
 } from '../controllers/adminController';
 
 const router = express.Router();
@@ -41,5 +44,9 @@ router.post('/reset-user-password', protect, authorize('admin'), adminResetUserP
 router.get('/export/teams-flat', protect, authorize('admin'), exportTeamsCSVFlat);
 router.get('/export/teams-structured', protect, authorize('admin'), exportTeamsCSVStructured);
 
-export default router;
+// Team Selections & Settings Routes
+router.get('/team-selections', protect, authorize('admin'), getTeamSelections);
+router.get('/settings/problem-lock', protect, authorize('admin'), getProblemSelectionLock);
+router.put('/settings/problem-lock', protect, authorize('admin'), setProblemSelectionLock);
 
+export default router;

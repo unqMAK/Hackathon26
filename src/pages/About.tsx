@@ -562,74 +562,7 @@ const About = () => {
           </div>
         </div>
 
-        {/* Meet the Developers Section */}
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Meet the Developers</h2>
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                name: 'Amey Telkar',
-                role: 'Full Stack Developer',
-                linkedin: 'https://www.linkedin.com/in/amey-telkar-ab14a12a9',
-                color: 'bg-blue-300',
-                borderColor: 'border-blue-500'
-              },
-              {
-                name: 'Rushikesh Chintanpalli',
-                role: 'Full Stack Developer',
-                linkedin: 'https://www.linkedin.com/in/rushikesh-chintanpalli-771449370',
-                color: 'bg-green-300',
-                borderColor: 'border-green-500'
-              },
-              {
-                name: 'Abhishek Kamble',
-                role: 'Frontend Developer',
-                linkedin: 'https://www.linkedin.com/in/abhishekkamble-dev',
-                color: 'bg-purple-300',
-                borderColor: 'border-purple-500'
-              },
-              {
-                name: 'Atherv Telkar',
-                role: 'Backend Developer',
-                linkedin: 'https://www.linkedin.com/in/atherv-telkar-a59948330',
-                color: 'bg-yellow-300',
-                borderColor: 'border-yellow-500'
-              }
-            ].map((dev, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-xl border border-gray-100 relative overflow-hidden hover:scale-105 transition-transform duration-300">
-                {/* Decorative Background Elements */}
-                <div className={`absolute top-0 right-0 w-24 h-24 ${dev.color} rounded-full -mr-12 -mt-12 opacity-40`}></div>
-                <div className={`absolute bottom-0 left-0 w-20 h-20 ${dev.color} rounded-full -ml-10 -mb-10 opacity-40`}></div>
 
-                <div className="flex flex-col items-center text-center relative z-10">
-                  <div className={`relative w-32 h-32 rounded-full flex items-center justify-center border-4 ${dev.borderColor} bg-white shadow-lg mb-6 group`}>
-                    <a href={dev.linkedin} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-full h-full hover:bg-gray-50 rounded-full transition-colors">
-                      <Linkedin className="w-16 h-16 text-[#0077b5] group-hover:scale-110 transition-transform duration-300" />
-                    </a>
-                  </div>
-                  <div className="inline-block px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold mb-3">
-                    Developer
-                  </div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-900">
-                    {dev.name}
-                  </h3>
-                  <h4 className="text-md font-semibold text-gray-600 mb-4 flex items-center justify-center gap-2">
-                    <Code className="w-4 h-4 text-gray-500" />
-                    {dev.role}
-                  </h4>
-                  <a
-                    href={dev.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-medium text-[#0077b5] hover:underline flex items-center gap-1"
-                  >
-                    View Profile <Linkedin className="w-3 h-3" />
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
 
 

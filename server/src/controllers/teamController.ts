@@ -4,6 +4,7 @@ import User from '../models/User';
 import mongoose from 'mongoose';
 import Notification from '../models/Notification';
 import emailService from '../services/emailService';
+import Settings from '../models/Settings';
 
 export const getTeams = async (req: Request, res: Response) => {
     try {
@@ -222,6 +223,13 @@ export const selectProblem = async (req: any, res: Response) => {
         console.log('User ID:', req.user._id);
 
         const { problemId } = req.body;
+
+        // Check if problem selection is locked
+        const lockSetting = await Settings.findOne({ key: 'problemSelectionLocked' });
+        if (lockSetting?.value === true) {
+            console.log('ERROR: Problem selection is locked by admin');
+            return res.status(403).json({ message: 'Problem selection is currently locked by the administrator. No changes allowed.' });
+        }
 
         // Validate problemId
         if (!problemId) {

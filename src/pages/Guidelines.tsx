@@ -6,50 +6,36 @@ import { Mail, Phone, FileText, Download, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const Guidelines = () => {
-  const [activeTab, setActiveTab] = useState('institutes');
+  const [activeTab, setActiveTab] = useState('resources');
 
   const downloadResources = [
     {
-      title: 'SPOC Consent Letter',
-      description: 'Official consent letter template for institutional SPOCs',
-      gradient: 'from-blue-500 to-blue-600',
+      title: 'Team Registration Form',
+      description: 'Authorization letter template for team registration',
+      gradient: 'from-yellow-500 to-orange-500',
       icon: FileText,
-      link: '/Consent_Letter.pdf',
+      link: '/assets/MITVPU-Team-Authorization-Letter-2026.docx',
     },
     {
       title: 'Idea Presentation Template',
       description: 'PowerPoint template for idea submission',
       gradient: 'from-teal-500 to-green-500',
       icon: FileText,
-      link: '/MIT Hackathon Presentation.pptx',
+      link: '/assets/MITVPU-SAMVED-Idea-Presentation-Template.pptx',
     },
     {
       title: 'Hackathon Rulebook',
       description: 'Complete rules and regulations document',
       gradient: 'from-purple-500 to-purple-600',
       icon: FileText,
-      link: '/Hackathon Rule Book.pdf',
-    },
-    {
-      title: 'Team Registration Form',
-      description: 'Excel sheet for team member details',
-      gradient: 'from-yellow-500 to-orange-500',
-      icon: FileText,
-      link: '',
+      link: '/assets/MITVPU-Hackathon-Rulebook-2026.pdf',
     },
     {
       title: 'Code of Conduct',
-      description: 'Ethics and behavior guidelines',
-      gradient: 'from-red-500 to-rose-600',
+      description: 'Ethics and behavior guidelines for participants',
+      gradient: 'from-red-500 to-red-600',
       icon: FileText,
-      link: '/Code of Conduct.pdf',
-    },
-    {
-      title: 'Problem Statement Brief',
-      description: 'Detailed problem statement documentation',
-      gradient: 'from-indigo-500 to-violet-600',
-      icon: FileText,
-      link: '',
+      link: '/assets/MITVPU-Hackathon-Code-of-Conduct.pdf',
     },
   ];
 
@@ -151,7 +137,7 @@ const Guidelines = () => {
           <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white animate-slide-up" style={{
             textShadow: '0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2)'
           }}>
-            Guidelines
+            Resources & Guidelines
           </h1>
           <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{
             textShadow: '0 2px 8px rgba(0,0,0,0.2)',
@@ -166,27 +152,74 @@ const Guidelines = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 relative z-20 animate-scale-in" style={{ animationDelay: '0.2s' }}>
         <div className="flex gap-5 mb-10 justify-center flex-wrap">
           <button
-            onClick={() => setActiveTab('institutes')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${activeTab === 'institutes'
-              ? 'bg-[#800000] text-white shadow-lg'
-              : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-md'
-              }`}
-          >
-            For Institutes/Universities
-          </button>
-          <button
-            onClick={() => setActiveTab('idea')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${activeTab === 'idea'
+            onClick={() => setActiveTab('resources')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${activeTab === 'resources'
               ? 'bg-[#800000] text-white shadow-lg'
               : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-md'
               }`}
           >
             Resources
           </button>
+          <button
+            onClick={() => setActiveTab('guidelines')}
+            className={`px-6 py-3 rounded-lg font-semibold transition-all duration-300 ${activeTab === 'guidelines'
+              ? 'bg-[#800000] text-white shadow-lg'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 hover:shadow-md'
+              }`}
+          >
+            Guidelines
+          </button>
         </div>
 
-        {/* Content for Institutes/Universities Tab */}
-        {activeTab === 'institutes' && (
+        {/* Content for Resources Tab (Primary) */}
+        {activeTab === 'resources' && (
+          <div className="pb-16 animate-fade-in">
+            <h2 className="text-4xl font-bold mb-4 text-center animate-slide-up" style={{
+              color: '#800000',
+              animationDelay: '0.1s'
+            }}>
+              Download Resources
+            </h2>
+            <p className="text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              Get all the essential documents and templates you need for the hackathon
+            </p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {downloadResources.map((resource, index) => (
+                <Card
+                  key={index}
+                  className="border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 bg-white hover-lift group animate-fade-in overflow-hidden"
+                  style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+                >
+                  <CardContent className="pt-8 pb-8 px-6">
+                    <div className="flex flex-col items-center text-center">
+                      <div className={`w-16 h-16 bg-gradient-to-br ${resource.gradient} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <resource.icon className="h-8 w-8 text-white" />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-3">
+                        {resource.title}
+                      </h3>
+                      <p className="text-gray-600 mb-6 leading-relaxed min-h-[48px]">
+                        {resource.description}
+                      </p>
+                      <a href={resource.link} download className="w-full">
+                        <Button
+                          className={`w-full bg-gradient-to-r ${resource.gradient} hover:shadow-lg text-white font-semibold transition-all duration-300 transform hover:scale-105`}
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Content for Guidelines Tab (Secondary) */}
+        {activeTab === 'guidelines' && (
           <div className="animate-fade-in">
             <h2 className="text-4xl font-bold mb-10 text-center animate-slide-up" style={{
               color: '#800000',
@@ -197,7 +230,7 @@ const Guidelines = () => {
 
             {/* First Row - SPOC Registration Process & Team Management */}
             <div className="grid md:grid-cols-2 gap-8 mb-8">
-              {/* SPOC Registration Process */}
+              {/* SPOC Registration Process - 7 Steps from Production */}
               <Card className="border border-orange-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-[#FFF5EA] hover-lift animate-fade-in group" style={{ animationDelay: '0.2s' }}>
                 <CardContent className="pt-8 pb-8 px-8">
                   <div className="flex items-center gap-4 mb-6">
@@ -205,39 +238,43 @@ const Guidelines = () => {
                       <CheckCircle2 className="h-7 w-7 text-blue-600" />
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900">
-                      SPOC Registration Process
+                      SPOC/Mentor Registration Process
                     </h3>
                   </div>
                   <ol className="space-y-4 text-gray-700 leading-relaxed">
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">1.</span>
-                      <span>Faculty member registers as SPOC via the official hackathon portal</span>
+                      <span>Faculty registration as SPOC/Mentor via MIT Vishwaprayag University Hackathon portal will be created by admin.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">2.</span>
-                      <span>Upload authorization letter on institutional letterhead (digitally signed preferred)</span>
+                      <span>Upload authorization letter on institutional letterhead (digitally signed preferred).</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">3.</span>
-                      <span>Verify institutional email through OTP verification</span>
+                      <span>Submit AICTE/UGC/NAAC affiliation details for institutional validation.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">4.</span>
-                      <span>Submit AICTE/UGC/NAAC affiliation details for institutional validation</span>
+                      <span>Receive portal access upon verification (within 48 hours).</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">5.</span>
-                      <span>Receive portal access upon verification (within 48 hours)</span>
+                      <span>Complete institutional profile with ABC (Academic Bank of Credits) integration status.</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="font-bold text-[#800000] text-lg flex-shrink-0">6.</span>
-                      <span>Complete institutional profile with ABC (Academic Bank of Credits) integration status</span>
+                      <span>After registration approval, students receive email for successful registration and ID card download from the student dashboard.</span>
+                    </li>
+                    <li className="flex items-start gap-3">
+                      <span className="font-bold text-[#800000] text-lg flex-shrink-0">7.</span>
+                      <span>Team Leader can download ID card for entire team as well as for individual members.</span>
                     </li>
                   </ol>
                 </CardContent>
               </Card>
 
-              {/* Team Composition & Eligibility */}
+              {/* Team Composition & Eligibility - Exactly 5 members */}
               <Card className="border border-orange-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-[#FFF5EA] hover-lift animate-fade-in group" style={{ animationDelay: '0.3s' }}>
                 <CardContent className="pt-8 pb-8 px-8">
                   <div className="flex items-center gap-4 mb-6">
@@ -251,7 +288,7 @@ const Guidelines = () => {
                   <ul className="space-y-4 text-gray-700 leading-relaxed">
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Minimum 2, maximum 4 students per team</span>
+                      <span><strong>Each team must have exactly 5 members</strong></span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
@@ -263,15 +300,11 @@ const Guidelines = () => {
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>At least one female team member recommended for diversity</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
                       <span>Each team must have a designated faculty mentor from their institution</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Registration exclusively through institutional SPOC</span>
+                      <span>Registration exclusively through institutional SPOC/Mentor</span>
                     </li>
                   </ul>
                 </CardContent>
@@ -294,7 +327,7 @@ const Guidelines = () => {
                   <ul className="space-y-4 text-gray-700 leading-relaxed">
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>SPOC authorization letter on institutional letterhead (mandatory)</span>
+                      <span>SPOC/Mentor authorization letter on institutional letterhead (mandatory)</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
@@ -320,7 +353,7 @@ const Guidelines = () => {
                 </CardContent>
               </Card>
 
-              {/* Important Deadlines */}
+              {/* Important Deadlines - Updated from Production */}
               <Card className="border border-orange-100 shadow-sm hover:shadow-lg transition-all duration-300 bg-[#FFF5EA] hover-lift animate-fade-in group" style={{ animationDelay: '0.5s' }}>
                 <CardContent className="pt-8 pb-8 px-8">
                   <div className="flex items-center gap-4 mb-6">
@@ -334,23 +367,15 @@ const Guidelines = () => {
                   <ul className="space-y-4 text-gray-700 leading-relaxed">
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>SPOC Registration: <strong className="text-[#800000]">December 31, 2025</strong></span>
+                      <span>SPOC/Mentor Registration: <strong className="text-[#800000]">6th Jan 2026 to 4th Feb 2026</strong></span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Team Registration: <strong className="text-[#800000]">January 15, 2026</strong></span>
+                      <span>Idea Submission: <strong className="text-[#800000]">15 Jan 2026 to 05th Feb 2026</strong></span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Problem Statement Selection: <strong className="text-[#800000]">January 31, 2026</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Pre-Hackathon Submission: <strong className="text-[#800000]">February 28, 2026</strong></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <span className="text-[#FF6B35] text-xl flex-shrink-0">•</span>
-                      <span>Final Hackathon: <strong className="text-[#800000]">March 15-16, 2026</strong></span>
+                      <span>Final Hackathon: <strong className="text-[#800000]">15-16 April, 2026</strong></span>
                     </li>
                   </ul>
                 </CardContent>
@@ -407,62 +432,6 @@ const Guidelines = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
-        )}
-
-        {/* Content for Idea PPT Download Tab */}
-        {activeTab === 'idea' && (
-          <div className="pb-16 animate-fade-in">
-            <h2 className="text-4xl font-bold mb-4 text-center animate-slide-up" style={{
-              color: '#800000',
-              animationDelay: '0.1s'
-            }}>
-              Download Resources
-            </h2>
-            <p className="text-center text-gray-600 mb-12 text-lg max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Get all the essential documents and templates you need for the hackathon
-            </p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {downloadResources.map((resource, index) => (
-                <Card
-                  key={index}
-                  className="border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 bg-white hover-lift group animate-fade-in overflow-hidden"
-                  style={{ animationDelay: `${0.1 * (index + 1)}s` }}
-                >
-                  <CardContent className="pt-8 pb-8 px-6">
-                    <div className="flex flex-col items-center text-center">
-                      <div className={`w-16 h-16 bg-gradient-to-br ${resource.gradient} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                        <resource.icon className="h-8 w-8 text-white" />
-                      </div>
-                      <h3 className="text-xl font-bold text-gray-900 mb-3">
-                        {resource.title}
-                      </h3>
-                      <p className="text-gray-600 mb-6 leading-relaxed min-h-[48px]">
-                        {resource.description}
-                      </p>
-                      {resource.link ? (
-                        <a href={resource.link} download className="w-full">
-                          <Button
-                            className={`w-full bg-gradient-to-r ${resource.gradient} hover:shadow-lg text-white font-semibold transition-all duration-300 transform hover:scale-105`}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
-                        </a>
-                      ) : (
-                        <Button
-                          className={`w-full bg-gradient-to-r ${resource.gradient} hover:shadow-lg text-white font-semibold transition-all duration-300 transform hover:scale-105`}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface IAnnouncement extends Document {
     title: string;
     message: string;
+    link?: string;
     type: 'info' | 'warning' | 'urgent' | 'general';
     audience: 'all' | 'institute' | 'team';
     displayLocation: 'home' | 'dashboard' | 'both';
@@ -24,6 +25,11 @@ const AnnouncementSchema: Schema = new Schema({
         type: String,
         required: [true, 'Message is required'],
         maxlength: [2000, 'Message cannot exceed 2000 characters']
+    },
+    link: {
+        type: String,
+        trim: true,
+        default: null
     },
     type: {
         type: String,

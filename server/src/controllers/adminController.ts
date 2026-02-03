@@ -1024,3 +1024,86 @@ export const exportTeamsCSVStructured = async (req: Request, res: Response) => {
     }
 };
 
+// ==================== SETTINGS MANAGEMENT ====================
+import Settings from '../models/Settings';
+
+// Get problem selection lock status
+export const getProblemSelectionLock = async (req: Request, res: Response) => {
+    try {
+        const setting = await Settings.findOne({ key: 'problemSelectionLocked' });
+        res.json({ locked: setting?.value ?? false });
+    } catch (error) {
+        console.error('Error getting problem selection lock:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Set problem selection lock status
+export const setProblemSelectionLock = async (req: Request, res: Response) => {
+    const { locked } = req.body;
+
+    try {
+        await Settings.findOneAndUpdate(
+            { key: 'problemSelectionLocked' },
+            { key: 'problemSelectionLocked', value: locked },
+            { upsert: true, new: true }
+        );
+
+        console.log(`Problem selection lock set to: ${locked}`);
+        res.json({
+            message: locked ? 'Problem selection locked' : 'Problem selection unlocked',
+            locked
+        });
+    } catch (error) {
+        console.error('Error setting problem selection lock:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Get all team selections for admin view
+export const getTeamSelections = async (req: Request, res: Response) => {
+    try {
+        // Get all approved teams with their problem selections
+        const teams = await Team.find({ status: 'approved' })
+            .populate('leaderId', 'name email phone')
+            .populate('problemId', 'title category type')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Transform for frontend
+        const selections = teams.map((team: any) => ({
+            _id: team._id,
+            teamName: team.name,
+            instituteCode: team.instituteCode,
+            instituteName: team.instituteName,
+            leaderName: team.leaderId?.name || 'N/A',
+            leaderEmail: team.leaderId?.email || 'N/A',
+            leaderPhone: team.leaderId?.phone || 'N/A',
+            selectedProblem: team.problemId ? {
+                _id: team.problemId._id,
+                title: team.problemId.title,
+                category: team.problemId.category,
+                type: team.problemId.type
+            } : null,
+            hasSelection: !!team.problemId,
+            memberCount: team.members?.length || 0
+        }));
+
+        // Get lock status
+        const lockSetting = await Settings.findOne({ key: 'problemSelectionLocked' });
+
+        res.json({
+            selections,
+            locked: lockSetting?.value ?? false,
+            stats: {
+                totalTeams: selections.length,
+                teamsWithSelection: selections.filter(s => s.hasSelection).length,
+                teamsWithoutSelection: selections.filter(s => !s.hasSelection).length
+            }
+        });
+    } catch (error) {
+        console.error('Error getting team selections:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+

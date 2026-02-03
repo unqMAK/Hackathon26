@@ -643,8 +643,9 @@ const AdminUsersPage = () => {
                                                             variant="ghost"
                                                             size="sm"
                                                             onClick={() => handleDeleteUser(user._id)}
-                                                            disabled={deleteUserMutation.isPending}
-                                                            title="Delete User"
+                                                            disabled={deleteUserMutation.isPending || user.role === 'admin'}
+                                                            title={user.role === 'admin' ? 'Cannot delete admin users' : 'Delete User'}
+                                                            className={user.role === 'admin' ? 'cursor-not-allowed opacity-50' : ''}
                                                         >
                                                             <Trash2 className="h-4 w-4 text-destructive" />
                                                         </Button>

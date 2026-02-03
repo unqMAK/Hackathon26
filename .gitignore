@@ -28,3 +28,4 @@ _backup_local/
 dist/
 *.zip
 *.tar.gz
+*.zip

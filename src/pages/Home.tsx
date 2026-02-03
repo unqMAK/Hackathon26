@@ -116,6 +116,10 @@ const Home = () => {
               <br />
               <span className="text-2xl md:text-4xl text-white/90">2025–26</span>
             </h1>
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-3xl md:text-5xl font-bold bg-gradient-to-r from-[#ff9a44] via-[#ff7a00] to-pink-600 bg-clip-text text-transparent">SAMVED</span>
+              <span className="text-lg md:text-xl text-white/90 font-medium">A Smart Governance Hackathon</span>
+            </div>
             <p className="text-base md:text-lg text-white/90 leading-relaxed max-w-3xl mx-auto font-allumi">
               Join us for an incredible journey of innovation, collaboration, and problem-solving.
               <br />
@@ -382,7 +386,7 @@ const Home = () => {
                 lineHeight: '1.3'
               }}
             >
-              MIT Innovation Ecosystem
+              MIT Vishwaprayag University Innovation Ecosystem
             </h2>
             <p className="text-xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
               Discover how MIT Vishwaprayag University is fostering innovation and nurturing the next generation of tech leaders
@@ -584,7 +588,7 @@ const Home = () => {
             </Button>
             <Button size="lg" className="bg-white/10 border-2 border-white text-white hover:bg-white hover:text-[#8B2A3B] text-base font-semibold backdrop-blur-sm transition-all" asChild>
               <Link to="/guidelines">
-                View Guidelines
+                View Resources
               </Link>
             </Button>
           </div>

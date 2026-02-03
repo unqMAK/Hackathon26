@@ -34,3 +34,13 @@ export const updateDeadline = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server Error', error });
     }
 };
+
+// Get problem selection lock status (for students)
+export const getProblemLockStatus = async (req: Request, res: Response) => {
+    try {
+        const setting = await Settings.findOne({ key: 'problemSelectionLocked' });
+        res.json({ locked: setting?.value ?? false });
+    } catch (error) {
+        res.status(500).json({ message: 'Server Error', error });
+    }
+};

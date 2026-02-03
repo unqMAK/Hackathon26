@@ -72,6 +72,8 @@ import instituteRoutes from './routes/instituteRoutes';
 app.use('/api/institutes', instituteRoutes);
 import problemApplicationRoutes from './routes/problemApplicationRoutes';
 app.use('/api/problem-applications', problemApplicationRoutes);
+import problemSelectionRoutes from './routes/problemSelectionRoutes';
+app.use('/api/problem-selection', problemSelectionRoutes);
 
 // Serve static certificates
 import path from 'path';
