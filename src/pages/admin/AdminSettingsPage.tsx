@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,10 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Calendar, Users, Settings, AlertTriangle, Save } from 'lucide-react';
+import { Calendar, Users, Settings, AlertTriangle, Save, Loader2 } from 'lucide-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import api from '@/lib/api';
 
 const AdminSettingsPage = () => {
-    // General Settings
+    const queryClient = useQueryClient();
+
+    // General Settings (local state for now)
     const [hackathonName, setHackathonName] = useState('HackSphere 2025');
     const [tagline, setTagline] = useState('Innovate for the Future');
     const [description, setDescription] = useState('Annual hackathon event bringing together the brightest minds.');
@@ -29,7 +33,34 @@ const AdminSettingsPage = () => {
 
     // System
     const [maintenanceMode, setMaintenanceMode] = useState(false);
-    const [registrationsOpen, setRegistrationsOpen] = useState(true);
+
+    // Fetch registration status from backend
+    const { data: registrationData, isLoading: isLoadingRegistration } = useQuery({
+        queryKey: ['registrationOpen'],
+        queryFn: async () => {
+            const response = await api.get('/admin/settings/registration-open');
+            return response.data;
+        }
+    });
+
+    // Mutation to update registration status
+    const registrationMutation = useMutation({
+        mutationFn: async (open: boolean) => {
+            const response = await api.put('/admin/settings/registration-open', { open });
+            return response.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['registrationOpen'] });
+            toast.success(data.message);
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || 'Failed to update registration status');
+        }
+    });
+
+    const handleRegistrationToggle = (checked: boolean) => {
+        registrationMutation.mutate(checked);
+    };
 
     const handleSave = () => {
         toast.success('Settings updated successfully!');
@@ -155,14 +186,18 @@ const AdminSettingsPage = () => {
 
                             <div className="flex items-center justify-between">
                                 <div className="space-y-0.5">
-                                    <Label className="text-base">Registrations Open</Label>
+                                    <Label className="text-base flex items-center gap-2">
+                                        Registrations Open
+                                        {isLoadingRegistration && <Loader2 className="h-4 w-4 animate-spin" />}
+                                    </Label>
                                     <p className="text-sm text-muted-foreground">
-                                        Control whether new users can register for the hackathon.
+                                        Control whether new teams can register for the hackathon.
                                     </p>
                                 </div>
                                 <Switch
-                                    checked={registrationsOpen}
-                                    onCheckedChange={setRegistrationsOpen}
+                                    checked={registrationData?.open ?? true}
+                                    onCheckedChange={handleRegistrationToggle}
+                                    disabled={isLoadingRegistration || registrationMutation.isPending}
                                 />
                             </div>
                         </CardContent>
@@ -207,3 +242,4 @@ const AdminSettingsPage = () => {
 };
 
 export default AdminSettingsPage;
+

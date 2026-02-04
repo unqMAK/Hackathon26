@@ -511,18 +511,31 @@ export const approveGovernanceTeam = async (req: Request, res: Response) => {
             // 1. Team Leader - Send Welcome Email
             await emailService.sendWelcomeEmail(pendingTeam.leaderEmail, pendingTeam.leaderName, team.name);
 
-            // 2. SPOC - Send Credentials (if new) or Notification (if existing)
-            if (spocData.isNew) {
-                await emailService.sendCredentialEmail(pendingTeam.spocEmail, pendingTeam.spocName, 'Institute SPOC', spocData.actualPassword, false);
-            } else {
-                await emailService.sendCredentialEmail(spoc.email, spoc.name, 'Institute SPOC', undefined, true);
-            }
+            // Check if SPOC and Mentor are the same person (synonymous in this system)
+            const isSamePerson = pendingTeam.spocEmail.toLowerCase() === pendingTeam.mentorEmail.toLowerCase();
 
-            // 3. Mentor - Send Credentials (if new) or Notification (if existing)
-            if (mentorData.isNew) {
-                await emailService.sendCredentialEmail(pendingTeam.mentorEmail, pendingTeam.mentorName, 'Institute Mentor', mentorData.actualPassword, false);
+            if (isSamePerson) {
+                // 2. Combined SPOC/Mentor - Send single email
+                if (spocData.isNew) {
+                    await emailService.sendCredentialEmail(pendingTeam.spocEmail, pendingTeam.spocName, 'Institute SPOC/Mentor', spocData.actualPassword, false);
+                } else {
+                    await emailService.sendCredentialEmail(spoc.email, spoc.name, 'Institute SPOC/Mentor', undefined, true);
+                }
+                console.log(`SPOC/Mentor are same person (${pendingTeam.spocEmail}) - sent single email`);
             } else {
-                await emailService.sendCredentialEmail(mentor.email, mentor.name, 'Institute Mentor', undefined, true);
+                // 2. SPOC - Send Credentials (if new) or Notification (if existing)
+                if (spocData.isNew) {
+                    await emailService.sendCredentialEmail(pendingTeam.spocEmail, pendingTeam.spocName, 'Institute SPOC', spocData.actualPassword, false);
+                } else {
+                    await emailService.sendCredentialEmail(spoc.email, spoc.name, 'Institute SPOC', undefined, true);
+                }
+
+                // 3. Mentor - Send Credentials (if new) or Notification (if existing)
+                if (mentorData.isNew) {
+                    await emailService.sendCredentialEmail(pendingTeam.mentorEmail, pendingTeam.mentorName, 'Institute Mentor', mentorData.actualPassword, false);
+                } else {
+                    await emailService.sendCredentialEmail(mentor.email, mentor.name, 'Institute Mentor', undefined, true);
+                }
             }
         } catch (emailError: any) {
             console.error('Email sending failed (non-critical):', emailError.message);
@@ -912,109 +925,159 @@ export const exportTeamsCSVFlat = async (req: Request, res: Response) => {
     }
 };
 
-// CSV Export - Structured format (team summaries with statistics)
+// CSV Export - Structured format (human-readable report with statistics)
 export const exportTeamsCSVStructured = async (req: Request, res: Response) => {
     try {
         const teams = await Team.find({})
             .populate('leaderId', 'name email phone')
             .populate('members', 'name email phone')
             .populate('problemId', 'title')
+            .sort({ createdAt: -1 })
             .lean();
 
-        // CSV Headers for structured format
-        const headers = [
-            'Team ID',
-            'Team Name',
-            'Team Status',
-            'Institute Code',
-            'Institute Name',
-            'SPOC Name',
-            'SPOC Email',
-            'SPOC District',
-            'SPOC State',
-            'Mentor Name',
-            'Mentor Email',
-            'Problem Title',
-            'Leader Name',
-            'Leader Email',
-            'Leader Phone',
-            'Total Members',
-            'Pending Members',
-            'Progress',
-            'Ideation Phase',
-            'Prototype Phase',
-            'Development Phase',
-            'Final Phase',
-            'Consent File URL',
-            'Created At',
-            'Approved At',
-            'All Member Emails'
-        ];
-
-        const rows: string[][] = [];
+        // Calculate statistics
+        const problemCounts: Record<string, number> = {};
+        const stateCounts: Record<string, number> = {};
+        const districtCounts: Record<string, number> = {};
 
         for (const team of teams) {
-            const leader = team.leaderId as any;
-            const members = team.members as any[];
+            // Problem distribution
+            const problemTitle = (team.problemId as any)?.title || 'Not Selected';
+            problemCounts[problemTitle] = (problemCounts[problemTitle] || 0) + 1;
 
-            // Collect all member emails
-            const allEmails: string[] = [];
-            if (leader?.email) allEmails.push(leader.email);
-            if (members) {
-                for (const m of members) {
-                    if (m.email && m.email !== leader?.email) {
-                        allEmails.push(m.email);
-                    }
+            // State distribution
+            const state = team.spocState || 'Unknown';
+            stateCounts[state] = (stateCounts[state] || 0) + 1;
+
+            // District distribution
+            const district = team.spocDistrict || 'Unknown';
+            districtCounts[district] = (districtCounts[district] || 0) + 1;
+        }
+
+        // Sort by count descending
+        const sortByCount = (obj: Record<string, number>) =>
+            Object.entries(obj).sort((a, b) => b[1] - a[1]);
+
+        const totalTeams = teams.length;
+        const doubleLine = '═'.repeat(99);
+        const singleLine = '─'.repeat(101);
+        const now = new Date();
+
+        // Build report content
+        const lines: string[] = [];
+
+        // Header
+        lines.push(doubleLine);
+        lines.push('HACKSPHERE TEAM DATA EXPORT');
+        lines.push(`Generated: ${now.toLocaleDateString()}, ${now.toLocaleTimeString()}`);
+        lines.push(doubleLine);
+        lines.push('');
+        lines.push(`TOTAL TEAMS,${totalTeams}`);
+        lines.push('');
+
+        // Problem Statement Distribution
+        lines.push(singleLine);
+        lines.push('PROBLEM STATEMENT DISTRIBUTION');
+        lines.push(singleLine);
+        lines.push('Problem Statement,Teams Count,Percentage');
+        for (const [problem, count] of sortByCount(problemCounts)) {
+            const pct = ((count / totalTeams) * 100).toFixed(1);
+            lines.push(`${problem},${count},${pct}%`);
+        }
+        lines.push('');
+
+        // State-wise Distribution
+        lines.push(singleLine);
+        lines.push('STATE-WISE DISTRIBUTION');
+        lines.push(singleLine);
+        lines.push('State,Teams Count,Percentage');
+        for (const [state, count] of sortByCount(stateCounts)) {
+            const pct = ((count / totalTeams) * 100).toFixed(1);
+            lines.push(`${state},${count},${pct}%`);
+        }
+        lines.push('');
+
+        // District-wise Distribution
+        lines.push(singleLine);
+        lines.push('DISTRICT-WISE DISTRIBUTION');
+        lines.push(singleLine);
+        lines.push('District,Teams Count,Percentage');
+        for (const [district, count] of sortByCount(districtCounts)) {
+            const pct = ((count / totalTeams) * 100).toFixed(1);
+            lines.push(`${district},${count},${pct}%`);
+        }
+        lines.push('');
+        lines.push('');
+
+        // Team Details Section
+        lines.push(doubleLine);
+        lines.push('TEAM DETAILS');
+        lines.push(doubleLine);
+        lines.push('');
+        lines.push('Column Key: Role,Name,Phone,Email,Institute,District,State');
+        lines.push('');
+
+        let teamIndex = 1;
+        for (const team of teams) {
+            const leader = team.leaderId as any;
+            const members = (team.members as any[]) || [];
+            const problem = team.problemId as any;
+
+            lines.push(singleLine);
+            lines.push(`TEAM ${teamIndex}: ${team.name || 'Unnamed Team'}`);
+            lines.push(singleLine);
+
+            // Institute info
+            const instituteDisplay = team.instituteName
+                ? `"${team.instituteName}" (${team.instituteCode || 'N/A'})`
+                : team.instituteCode || 'N/A';
+            lines.push(`Institute:,${instituteDisplay}`);
+            lines.push(`Location:,${team.spocDistrict || 'N/A'},"${team.spocState || 'N/A'}"`);
+            lines.push(`Problem:,${problem?.title || 'Not Selected'}`);
+            lines.push(`Mentor:,${team.mentorName || 'N/A'},${team.mentorEmail || 'N/A'}`);
+            lines.push(`SPOC:,${team.spocName || 'N/A'},${team.spocEmail || 'N/A'}`);
+
+            const approvedDate = (team as any).approvedAt
+                ? new Date((team as any).approvedAt).toISOString().split('T')[0]
+                : ((team as any).createdAt ? new Date((team as any).createdAt).toISOString().split('T')[0] : 'N/A');
+            lines.push(`Approved:,${approvedDate}`);
+            lines.push('');
+
+            // Members table
+            lines.push('Role,Name,Phone,Email');
+
+            // Leader first
+            if (leader) {
+                lines.push(`L (Leader),${leader.name || 'N/A'},${leader.phone || 'N/A'},${leader.email || 'N/A'}`);
+            }
+
+            // Other members
+            let memberNum = 1;
+            for (const member of members) {
+                if (member._id?.toString() !== leader?._id?.toString()) {
+                    lines.push(`M${memberNum} (Member),${member.name || 'N/A'},${member.phone || 'N/A'},${member.email || 'N/A'}`);
+                    memberNum++;
                 }
             }
 
-            rows.push([
-                team._id?.toString() || '',
-                team.name || '',
-                team.status || '',
-                team.instituteCode || '',
-                team.instituteName || '',
-                team.spocName || '',
-                team.spocEmail || '',
-                team.spocDistrict || '',
-                team.spocState || '',
-                team.mentorName || '',
-                team.mentorEmail || '',
-                (team.problemId as any)?.title || 'Not Assigned',
-                leader?.name || '',
-                leader?.email || '',
-                leader?.phone || '',
-                String(members?.length || 0),
-                String(team.pendingMembers?.length || 0),
-                String(team.progress || 0),
-                team.phases?.ideation || 'pending',
-                team.phases?.prototype || 'pending',
-                team.phases?.development || 'pending',
-                team.phases?.final || 'pending',
-                team.consentFile || '',
-                (team as any).createdAt ? new Date((team as any).createdAt).toISOString() : '',
-                (team as any).approvedAt ? new Date((team as any).approvedAt).toISOString() : '',
-                allEmails.join('; ')
-            ]);
+            // Pending members
+            if (team.pendingMembers && team.pendingMembers.length > 0) {
+                for (const pending of team.pendingMembers) {
+                    lines.push(`M${memberNum} (Pending),${pending.name || 'N/A'},N/A,${pending.email || 'N/A'}`);
+                    memberNum++;
+                }
+            }
+
+            lines.push('');
+            lines.push('');
+            teamIndex++;
         }
 
-        // Build CSV content
-        const escapeCSV = (value: string) => {
-            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-                return `"${value.replace(/"/g, '""')}"`;
-            }
-            return value;
-        };
-
-        const csvContent = [
-            headers.map(escapeCSV).join(','),
-            ...rows.map(row => row.map(escapeCSV).join(','))
-        ].join('\n');
-
+        const csvContent = lines.join('\n');
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
         const filename = `hacksphere_teams_structured_${timestamp}.csv`;
 
-        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
         res.send(csvContent);
 
@@ -1023,6 +1086,7 @@ export const exportTeamsCSVStructured = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error while exporting teams' });
     }
 };
+
 
 // ==================== SETTINGS MANAGEMENT ====================
 import Settings from '../models/Settings';
@@ -1107,3 +1171,149 @@ export const getTeamSelections = async (req: Request, res: Response) => {
     }
 };
 
+// ==================== EXCEL EXPORT ====================
+import * as XLSX from 'xlsx';
+
+// Excel Export - Flat format (one row per team)
+export const exportTeamsExcel = async (req: Request, res: Response) => {
+    try {
+        const teams = await Team.find({})
+            .populate('leaderId', 'name email phone')
+            .populate('members', 'name email phone')
+            .populate('problemId', 'title category type')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Build data rows
+        const data: any[][] = [];
+
+        // Headers
+        data.push([
+            'Sr.No', 'Team Name', 'Leader Name', 'Leader Email', 'Leader Phone',
+            'Member 2 Name', 'Member 2 Email', 'Member 3 Name', 'Member 3 Email',
+            'Member 4 Name', 'Member 4 Email', 'Member 5 Name', 'Member 5 Email',
+            'Mentor Name', 'Mentor Email', 'Institute Name', 'Institute Code',
+            'District', 'State', 'Problem Statement', 'Problem Category', 'Status', 'Approved Date'
+        ]);
+
+        let srNo = 1;
+        for (const team of teams) {
+            const leader = team.leaderId as any;
+            const members = (team.members as any[]) || [];
+            const problem = team.problemId as any;
+
+            const otherMembers = members.filter(m =>
+                m._id?.toString() !== leader?._id?.toString()
+            );
+
+            const pendingMembers = team.pendingMembers || [];
+            const allOtherMembers: { name: string; email: string }[] = [
+                ...otherMembers.map((m: any) => ({ name: m.name || '', email: m.email || '' })),
+                ...pendingMembers.map(p => ({ name: p.name || '', email: p.email || '' }))
+            ];
+
+            while (allOtherMembers.length < 4) {
+                allOtherMembers.push({ name: '', email: '' });
+            }
+
+            const approvedDate = (team as any).approvedAt
+                ? new Date((team as any).approvedAt).toISOString().split('T')[0]
+                : ((team as any).createdAt ? new Date((team as any).createdAt).toISOString().split('T')[0] : '');
+
+            data.push([
+                srNo++,
+                team.name || '',
+                leader?.name || '',
+                leader?.email || '',
+                leader?.phone || 'N/A',
+                allOtherMembers[0]?.name || '',
+                allOtherMembers[0]?.email || '',
+                allOtherMembers[1]?.name || '',
+                allOtherMembers[1]?.email || '',
+                allOtherMembers[2]?.name || '',
+                allOtherMembers[2]?.email || '',
+                allOtherMembers[3]?.name || '',
+                allOtherMembers[3]?.email || '',
+                team.mentorName || '',
+                team.mentorEmail || '',
+                team.instituteName || '',
+                team.instituteCode || '',
+                team.spocDistrict || '',
+                team.spocState || '',
+                problem?.title || 'Not Selected',
+                problem?.type || 'N/A',
+                team.status || '',
+                approvedDate
+            ]);
+        }
+
+        // Create workbook
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Set column widths
+        ws['!cols'] = [
+            { wch: 6 }, { wch: 25 }, { wch: 20 }, { wch: 30 }, { wch: 12 },
+            { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
+            { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
+            { wch: 20 }, { wch: 30 }, { wch: 40 }, { wch: 15 },
+            { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 12 }, { wch: 12 }, { wch: 12 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Teams');
+
+        // Generate buffer
+        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `hacksphere_teams_${timestamp}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Error exporting teams Excel:', error);
+        res.status(500).json({ message: 'Server error while exporting teams' });
+    }
+};
+
+// ==================== REGISTRATION TOGGLE ====================
+
+// Get registration open status
+export const getRegistrationOpen = async (req: Request, res: Response) => {
+    try {
+        const setting = await Settings.findOne({ key: 'registrationOpen' });
+        // Default to true if not set
+        res.json({ open: setting?.value ?? true });
+    } catch (error) {
+        console.error('Error getting registration status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+// Set registration open status (admin only)
+export const setRegistrationOpen = async (req: Request, res: Response) => {
+    const { open } = req.body;
+
+    if (typeof open !== 'boolean') {
+        return res.status(400).json({ message: 'Invalid value for "open" parameter' });
+    }
+
+    try {
+        await Settings.findOneAndUpdate(
+            { key: 'registrationOpen' },
+            { key: 'registrationOpen', value: open },
+            { upsert: true, new: true }
+        );
+
+        console.log(`Registration status set to: ${open ? 'OPEN' : 'CLOSED'}`);
+        res.json({
+            message: open ? 'Registration is now open' : 'Registration has been closed',
+            open
+        });
+    } catch (error) {
+        console.error('Error setting registration status:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

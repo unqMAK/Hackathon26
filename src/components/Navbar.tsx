@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import logo from '@/assets/mit-logo-organizer.png';
 import smcLogoNavbar from '@/assets/smc-logo.png';
 import NotificationsDropdown from './NotificationsDropdown';
+import axios from 'axios';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,10 +18,25 @@ import {
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
   const user = getCurrentUser();
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+
+  // Fetch registration status
+  useEffect(() => {
+    const fetchRegistrationStatus = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/registration-status`);
+        setRegistrationOpen(response.data.registrationOpen);
+      } catch (error) {
+        console.error('Error fetching registration status:', error);
+        setRegistrationOpen(true); // Default to open if error
+      }
+    };
+    fetchRegistrationStatus();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -147,13 +163,15 @@ const Navbar = () => {
                 >
                   <Link to="/login">Login</Link>
                 </Button>
-                <Button
-                  size="sm"
-                  className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 transition-all duration-200"
-                  asChild
-                >
-                  <Link to="/register-team">Register Team</Link>
-                </Button>
+                {registrationOpen && (
+                  <Button
+                    size="sm"
+                    className="bg-gradient-to-r from-secondary to-secondary/80 hover:from-secondary/90 hover:to-secondary/70 transition-all duration-200"
+                    asChild
+                  >
+                    <Link to="/register-team">Register Team</Link>
+                  </Button>
+                )}
               </>
             )}
             {/* SMC Logo - Always visible */}
@@ -226,14 +244,16 @@ const Navbar = () => {
                       Login
                     </Link>
                   </Button>
-                  <Button
-                    className="w-full bg-gradient-to-r from-secondary to-secondary/80 transition-all duration-200"
-                    asChild
-                  >
-                    <Link to="/register-team" onClick={() => setMobileMenuOpen(false)}>
-                      Register Team
-                    </Link>
-                  </Button>
+                  {registrationOpen && (
+                    <Button
+                      className="w-full bg-gradient-to-r from-secondary to-secondary/80 transition-all duration-200"
+                      asChild
+                    >
+                      <Link to="/register-team" onClick={() => setMobileMenuOpen(false)}>
+                        Register Team
+                      </Link>
+                    </Button>
+                  )}
                 </>
               )}
             </div>

@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Award, Users, Code, Trophy, Target, Lightbulb, GitBranch, Rocket } from 'lucide-react';
+import { ArrowRight, Award, Users, Code, Trophy, Target, Lightbulb, GitBranch, Rocket, Lock } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import HeroCountdown from '@/components/HeroCountdown';
@@ -15,12 +15,15 @@ import mitLogo from '@/assets/mit-vpu-logo-organizer.png';
 import processFlowImage from '@/assets/process-flow-v2.jpg';
 import TimelineSection from '@/components/TimelineSection';
 import PrizePool from '@/components/PrizePool';
+import axios from 'axios';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 const Home = () => {
   // Image slider state
   const heroImages = [buildingImage, smcBuildingImage];
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
 
   // Auto-transition effect
   useEffect(() => {
@@ -29,6 +32,21 @@ const Home = () => {
     }, 5000); // Change image every 5 seconds
     return () => clearInterval(interval);
   }, [heroImages.length]);
+
+  // Fetch registration status
+  useEffect(() => {
+    const fetchRegistrationStatus = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/registration-status`);
+        setRegistrationOpen(response.data.registrationOpen);
+      } catch (error) {
+        console.error('Error fetching registration status:', error);
+        // Default to open if error
+        setRegistrationOpen(true);
+      }
+    };
+    fetchRegistrationStatus();
+  }, []);
 
   const features = [
     {
@@ -132,11 +150,30 @@ const Home = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center">
-              <Button size="lg" className="bg-gradient-to-r from-secondary to-secondary/80 hover:shadow-glow text-base text-white" asChild>
-                <Link to="/register-team">
-                  Register Your Team <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      {registrationOpen ? (
+                        <Button size="lg" className="bg-gradient-to-r from-secondary to-secondary/80 hover:shadow-glow text-base text-white" asChild>
+                          <Link to="/register-team">
+                            Register Your Team <ArrowRight className="ml-2 h-5 w-5" />
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button size="lg" className="bg-gray-400 text-gray-200 cursor-not-allowed opacity-70" disabled>
+                          <Lock className="mr-2 h-4 w-4" /> Registration Closed
+                        </Button>
+                      )}
+                    </span>
+                  </TooltipTrigger>
+                  {!registrationOpen && (
+                    <TooltipContent>
+                      <p>Registration is currently closed. Please check back later.</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </TooltipProvider>
               <Button size="lg" className="bg-white text-gray-900 hover:bg-gray-100 text-base shadow-lg hover:shadow-xl transition-all" asChild>
                 <Link to="/problem-statements">
                   View Challenges <Code className="ml-2 h-5 w-5" />
@@ -581,11 +618,30 @@ const Home = () => {
             Join hundreds of innovators in creating impactful solutions
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-white text-primary hover:bg-white/90 hover:shadow-glow text-base" asChild>
-              <Link to="/register-team">
-                Get Started <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span>
+                    {registrationOpen ? (
+                      <Button size="lg" className="bg-white text-primary hover:bg-white/90 hover:shadow-glow text-base" asChild>
+                        <Link to="/register-team">
+                          Get Started <ArrowRight className="ml-2 h-5 w-5" />
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button size="lg" className="bg-gray-400 text-gray-200 cursor-not-allowed opacity-70" disabled>
+                        <Lock className="mr-2 h-4 w-4" /> Registration Closed
+                      </Button>
+                    )}
+                  </span>
+                </TooltipTrigger>
+                {!registrationOpen && (
+                  <TooltipContent>
+                    <p>Registration is currently closed. Please check back later.</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             <Button size="lg" className="bg-white/10 border-2 border-white text-white hover:bg-white hover:text-[#8B2A3B] text-base font-semibold backdrop-blur-sm transition-all" asChild>
               <Link to="/guidelines">
                 View Resources

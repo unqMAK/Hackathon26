@@ -251,6 +251,42 @@ const AdminUsersPage = () => {
         }
     };
 
+    const downloadExcel = async () => {
+        setIsDownloading(true);
+        try {
+            const response = await api.get('/admin/export/teams-excel', { responseType: 'blob' });
+
+            // Create download link
+            const blob = new Blob([response.data], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            // Extract filename from response headers or generate one
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `hacksphere_teams_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="(.+)"/);
+                if (match) filename = match[1];
+            }
+
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Teams data exported to Excel successfully');
+        } catch (error: any) {
+            console.error('Error downloading Excel:', error);
+            toast.error(error?.response?.data?.message || 'Failed to download Excel');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
 
     return (
         <DashboardLayout role="admin">
@@ -280,6 +316,17 @@ const AdminUsersPage = () => {
                             <Download className="mr-2 h-4 w-4" />
                             {isDownloading ? 'Downloading...' : 'Export Team CSV'}
                         </Button>
+                        <Button
+                            variant="outline"
+                            onClick={downloadExcel}
+                            disabled={isDownloading}
+                            title="Download as Excel spreadsheet"
+                            className="bg-green-50 hover:bg-green-100 border-green-200"
+                        >
+                            <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                            {isDownloading ? 'Downloading...' : 'Export Excel'}
+                        </Button>
+
                         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
                             <DialogTrigger asChild>
                                 <Button className="bg-gradient-to-r from-secondary to-secondary/80">

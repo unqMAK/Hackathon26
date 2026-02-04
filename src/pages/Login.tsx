@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,14 +6,30 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { LogIn, ArrowRight, ArrowLeft } from 'lucide-react';
+import { LogIn, ArrowRight, ArrowLeft, Lock } from 'lucide-react';
 import logoGif from '@/assets/mit-vpu-logo.gif';
+import axios from 'axios';
 
 const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(true);
+
+  // Fetch registration status
+  useEffect(() => {
+    const fetchRegistrationStatus = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/registration-status`);
+        setRegistrationOpen(response.data.registrationOpen);
+      } catch (error) {
+        console.error('Error fetching registration status:', error);
+        setRegistrationOpen(true); // Default to open if error
+      }
+    };
+    fetchRegistrationStatus();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,10 +145,19 @@ const Login = () => {
                 )}
               </Button>
               <div className="text-center text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link to="/register-team" className="text-secondary hover:underline font-semibold">
-                  Register Team <ArrowRight className="inline h-3 w-3" />
-                </Link>
+                {registrationOpen ? (
+                  <>
+                    Don't have an account?{' '}
+                    <Link to="/register-team" className="text-secondary hover:underline font-semibold">
+                      Register Team <ArrowRight className="inline h-3 w-3" />
+                    </Link>
+                  </>
+                ) : (
+                  <span className="flex items-center justify-center gap-1 text-gray-500">
+                    <Lock className="h-3 w-3" />
+                    Registration is currently closed
+                  </span>
+                )}
               </div>
             </CardFooter>
           </form>

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import Settings from '../models/Settings';
 
 // Get all SPOCs with their institute details
 export const getPublicSpocs = async (req: Request, res: Response) => {
@@ -29,5 +30,19 @@ export const getInstituteGovernance = async (req: Request, res: Response) => {
     } catch (error) {
         console.error('Error in getInstituteGovernance:', error);
         res.status(500).json({ message: 'Server Error' });
+    }
+};
+
+// Get registration open status (public, no auth required)
+export const getPublicRegistrationStatus = async (req: Request, res: Response) => {
+    try {
+        const setting = await Settings.findOne({ key: 'registrationOpen' });
+        // Default to true if setting doesn't exist
+        res.json({
+            registrationOpen: setting?.value ?? true
+        });
+    } catch (error) {
+        console.error('Error getting public registration status:', error);
+        res.status(500).json({ message: 'Server error' });
     }
 };

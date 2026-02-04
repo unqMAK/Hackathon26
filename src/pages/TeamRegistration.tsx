@@ -27,7 +27,8 @@ import {
     FileText,
     Check,
     Home,
-    Download
+    Download,
+    Lock
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
@@ -40,6 +41,28 @@ const TeamRegistration = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [checkingRegistration, setCheckingRegistration] = useState(true);
+    const [registrationClosed, setRegistrationClosed] = useState(false);
+
+    // Check if registration is open
+    useEffect(() => {
+        const checkRegistrationStatus = async () => {
+            try {
+                const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/registration-status`);
+                if (!response.data.registrationOpen) {
+                    setRegistrationClosed(true);
+                    toast.error('Registration is currently closed. Please check back later.');
+                    navigate('/');
+                }
+            } catch (error) {
+                console.error('Error checking registration status:', error);
+                // Allow access if check fails (fail open)
+            } finally {
+                setCheckingRegistration(false);
+            }
+        };
+        checkRegistrationStatus();
+    }, [navigate]);
 
 
 
@@ -48,6 +71,7 @@ const TeamRegistration = () => {
         leaderEmail: '',
         leaderPhone: '',
         leaderPassword: '',
+
         instituteCode: '',
         instituteName: '',
         teamName: '',
@@ -75,7 +99,7 @@ const TeamRegistration = () => {
         if (!code || code.length < 3) return;
         setIsInstituteLookupLoading(true);
         try {
-            const response = await axios.get(`http://localhost:5000/api/public/institute-lookup/${code}`);
+            const response = await axios.get(`/api/public/institute-lookup/${code}`);
             if (response.data.spoc || response.data.mentor) {
                 setExistingGovernance({
                     spoc: response.data.spoc,
@@ -124,7 +148,7 @@ const TeamRegistration = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/public/upload-consent', formData);
+            const response = await axios.post('/api/public/upload-consent', formData);
             handleInputChange('consentFile', response.data.fileUrl);
             toast.success('Document uploaded successfully!');
         } catch (error: any) {
@@ -144,9 +168,17 @@ const TeamRegistration = () => {
             return;
         }
 
+        // The UI combines SPOC/Mentor into single fields, but backend requires both.
+        // Copy SPOC data to mentor fields if mentor fields are empty.
+        const submissionData = {
+            ...formData,
+            mentorName: formData.mentorName || formData.spocName,
+            mentorEmail: formData.mentorEmail || formData.spocEmail,
+        };
+
         setLoading(true);
         try {
-            const response = await api.post('/teams/register', formData);
+            const response = await api.post('/teams/register', submissionData);
             toast.success(response.data.message);
             setStep(6); // Success step (now step 6)
         } catch (error: any) {
@@ -162,11 +194,27 @@ const TeamRegistration = () => {
         exit: { opacity: 0, x: -50 }
     };
 
+    // Show loading while checking registration status
+    if (checkingRegistration) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream via-skyblue to-accent/20">
+                <div className="flex flex-col items-center gap-4">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                    <p className="text-muted-foreground">Checking registration status...</p>
+                </div>
+            </div>
+        );
+    }
 
+    // If registration is closed, don't render (redirect happens in useEffect)
+    if (registrationClosed) {
+        return null;
+    }
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-cream via-skyblue to-accent/20 p-4 py-12 animate-fade-in">
             <div className="w-full max-w-4xl">
+
                 {/* Logo and Title - Above everything */}
                 <div className="text-center mb-8 animate-slide-up">
                     <img src={logoGif} alt="MIT Vishwaprayag University Logo" className="h-20 mx-auto mb-4" />

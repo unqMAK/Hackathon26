@@ -15,9 +15,12 @@ import {
     adminResetUserPassword,
     exportTeamsCSVFlat,
     exportTeamsCSVStructured,
+    exportTeamsExcel,
     getProblemSelectionLock,
     setProblemSelectionLock,
-    getTeamSelections
+    getTeamSelections,
+    getRegistrationOpen,
+    setRegistrationOpen
 } from '../controllers/adminController';
 
 const router = express.Router();
@@ -40,13 +43,18 @@ router.put('/password-reset-requests/:requestId/approve', protect, authorize('ad
 router.put('/password-reset-requests/:requestId/reject', protect, authorize('admin'), rejectPasswordReset);
 router.post('/reset-user-password', protect, authorize('admin'), adminResetUserPassword);
 
-// CSV Export Routes
+// CSV/Excel Export Routes
 router.get('/export/teams-flat', protect, authorize('admin'), exportTeamsCSVFlat);
 router.get('/export/teams-structured', protect, authorize('admin'), exportTeamsCSVStructured);
+router.get('/export/teams-excel', protect, authorize('admin'), exportTeamsExcel);
 
 // Team Selections & Settings Routes
 router.get('/team-selections', protect, authorize('admin'), getTeamSelections);
 router.get('/settings/problem-lock', protect, authorize('admin'), getProblemSelectionLock);
 router.put('/settings/problem-lock', protect, authorize('admin'), setProblemSelectionLock);
+
+// Registration Toggle Routes
+router.get('/settings/registration-open', protect, authorize('admin'), getRegistrationOpen);
+router.put('/settings/registration-open', protect, authorize('admin'), setRegistrationOpen);
 
 export default router;
