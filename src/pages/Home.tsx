@@ -37,7 +37,7 @@ const Home = () => {
   useEffect(() => {
     const fetchRegistrationStatus = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/public/registration-status`);
+        const response = await axios.get('/api/public/registration-status');
         setRegistrationOpen(response.data.registrationOpen);
       } catch (error) {
         console.error('Error fetching registration status:', error);
