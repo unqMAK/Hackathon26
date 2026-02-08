@@ -432,9 +432,9 @@ const Home = () => {
 
           {/* Two Column Layout */}
           <div className="grid md:grid-cols-2 gap-12 items-start">
-            {/* Left: YouTube Video Players (2 Videos Stacked) */}
+            {/* Left: YouTube Video Gallery (3 Videos) */}
             <div className="space-y-8">
-              {/* First Video */}
+              {/* Featured Video - Large */}
               <div
                 className="animate-scale-in"
                 style={{ animationDelay: '0.2s' }}
@@ -442,86 +442,159 @@ const Home = () => {
                 <div className="relative group">
                   {/* Outer Glow Effect */}
                   <div
-                    className="absolute -inset-4 rounded-2xl opacity-30 group-hover:opacity-40 transition-all duration-500"
+                    className="absolute -inset-3 rounded-2xl opacity-0 group-hover:opacity-40 transition-all duration-500"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(139,42,59,0.3) 0%, rgba(226,90,44,0.2) 100%)',
-                      filter: 'blur-xl group-hover:blur-2xl'
+                      background: 'linear-gradient(135deg, rgba(139,42,59,0.4) 0%, rgba(226,90,44,0.3) 100%)',
+                      filter: 'blur(20px)'
                     }}
                   ></div>
 
-                  {/* Video Container with Border */}
-                  <div className="relative border-4 border-white/80 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm transform group-hover:scale-105 transition-all duration-500">
+                  {/* Video Container with Premium Border */}
+                  <div className="relative overflow-hidden rounded-2xl shadow-2xl transform group-hover:scale-[1.02] transition-all duration-500"
+                    style={{
+                      border: '3px solid transparent',
+                      background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B2A3B, #E25A2C) border-box'
+                    }}
+                  >
                     {/* Responsive 16:9 Container */}
                     <div className="relative" style={{ paddingBottom: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full"
-                        src="https://www.youtube.com/embed/mIXF7_A3hsA"
-                        title="MIT Innovation Hub Video"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        src="https://www.youtube-nocookie.com/embed/ecbw-7Fba38?si=AaCcOSSAfY9CJYtG"
+                        title="SAMVED Grand Hackathon - Overview"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                       ></iframe>
                     </div>
 
-                    {/* Glossy Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/5 pointer-events-none"></div>
+                    {/* Glossy Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/10 pointer-events-none"></div>
                   </div>
 
-                  {/* Floating "Watch Now" Badge */}
+                  {/* Featured Badge */}
                   <div
-                    className="absolute bottom-4 right-4 px-4 py-2 rounded-full text-sm font-bold text-white shadow-lg animate-pulse"
+                    className="absolute -top-3 left-6 px-4 py-1.5 rounded-full text-xs font-bold text-white shadow-lg"
                     style={{
-                      background: 'linear-gradient(135deg, #E25A2C 0%, #c04622 100%)'
+                      background: 'linear-gradient(135deg, #8B2A3B 0%, #a53549 100%)'
                     }}
                   >
-                    🎥 Watch Now
+                    ⭐ FEATURED
                   </div>
                 </div>
               </div>
 
-              {/* Second Video */}
-              <div
-                className="animate-scale-in"
-                style={{ animationDelay: '0.3s' }}
-              >
-                <div className="relative group">
-                  {/* Outer Glow Effect */}
-                  <div
-                    className="absolute -inset-4 rounded-2xl opacity-30 group-hover:opacity-40 transition-all duration-500"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(139,42,59,0.3) 0%, rgba(226,90,44,0.2) 100%)',
-                      filter: 'blur-xl group-hover:blur-2xl'
-                    }}
-                  ></div>
+              {/* Two Smaller Videos Side by Side */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Second Video */}
+                <div
+                  className="animate-scale-in"
+                  style={{ animationDelay: '0.3s' }}
+                >
+                  <div className="relative group">
+                    {/* Outer Glow Effect */}
+                    <div
+                      className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-30 transition-all duration-500"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(226,90,44,0.4) 0%, rgba(139,42,59,0.3) 100%)',
+                        filter: 'blur(15px)'
+                      }}
+                    ></div>
 
-                  {/* Video Container with Border */}
-                  <div className="relative border-4 border-white/80 rounded-2xl overflow-hidden shadow-2xl backdrop-blur-sm transform group-hover:scale-105 transition-all duration-500">
-                    {/* Responsive 16:9 Container */}
-                    <div className="relative" style={{ paddingBottom: '56.25%' }}>
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full"
-                        src="https://www.youtube.com/embed/pgK3hnXzQcI"
-                        title="MIT Vishwaprayag University Campus Video"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
+                    {/* Video Container */}
+                    <div className="relative overflow-hidden rounded-xl shadow-xl transform group-hover:scale-[1.03] transition-all duration-500"
+                      style={{
+                        border: '2px solid transparent',
+                        background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #E25A2C, #8B2A3B) border-box'
+                      }}
+                    >
+                      {/* Responsive 16:9 Container */}
+                      <div className="relative" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src="https://www.youtube-nocookie.com/embed/P2umaYQptP8?si=XYcI0IOO_AzcELEA"
+                          title="SAMVED Hackathon - Journey"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+
+                      {/* Glossy Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/5 pointer-events-none"></div>
                     </div>
 
-                    {/* Glossy Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-transparent to-white/5 pointer-events-none"></div>
-                  </div>
-
-                  {/* Floating "Watch Now" Badge */}
-                  <div
-                    className="absolute bottom-4 right-4 px-4 py-2 rounded-full text-sm font-bold text-white shadow-lg animate-pulse"
-                    style={{
-                      background: 'linear-gradient(135deg, #E25A2C 0%, #c04622 100%)'
-                    }}
-                  >
-                    🎥 Watch Now
+                    {/* Play Badge */}
+                    <div
+                      className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-semibold text-white shadow-md opacity-80 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background: 'linear-gradient(135deg, #E25A2C 0%, #c04622 100%)'
+                      }}
+                    >
+                      ▶ Watch
+                    </div>
                   </div>
                 </div>
+
+                {/* Third Video */}
+                <div
+                  className="animate-scale-in"
+                  style={{ animationDelay: '0.4s' }}
+                >
+                  <div className="relative group">
+                    {/* Outer Glow Effect */}
+                    <div
+                      className="absolute -inset-2 rounded-xl opacity-0 group-hover:opacity-30 transition-all duration-500"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(139,42,59,0.4) 0%, rgba(226,90,44,0.3) 100%)',
+                        filter: 'blur(15px)'
+                      }}
+                    ></div>
+
+                    {/* Video Container */}
+                    <div className="relative overflow-hidden rounded-xl shadow-xl transform group-hover:scale-[1.03] transition-all duration-500"
+                      style={{
+                        border: '2px solid transparent',
+                        background: 'linear-gradient(white, white) padding-box, linear-gradient(135deg, #8B2A3B, #E25A2C) border-box'
+                      }}
+                    >
+                      {/* Responsive 16:9 Container */}
+                      <div className="relative" style={{ paddingBottom: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full"
+                          src="https://www.youtube-nocookie.com/embed/ZGBgBMtajgI?si=vY-JXbMiCYqn1NRu"
+                          title="SAMVED Hackathon - Highlights"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+
+                      {/* Glossy Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-white/5 pointer-events-none"></div>
+                    </div>
+
+                    {/* Play Badge */}
+                    <div
+                      className="absolute bottom-3 right-3 px-3 py-1 rounded-full text-xs font-semibold text-white shadow-md opacity-80 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background: 'linear-gradient(135deg, #8B2A3B 0%, #a53549 100%)'
+                      }}
+                    >
+                      ▶ Watch
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Video Section Label */}
+              <div className="text-center">
+                <p className="text-sm text-gray-500 font-medium tracking-wider uppercase">
+                  🎬 Official Event Coverage
+                </p>
               </div>
             </div>
+
 
             {/* Right: MIT Innovation Infographic */}
             <div

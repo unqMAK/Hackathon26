@@ -25,6 +25,10 @@ class EmailService {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS,
             },
+            // Add timeouts to prevent blocking the approval flow
+            connectionTimeout: 5000, // 5 seconds to establish connection
+            greetingTimeout: 5000,   // 5 seconds for SMTP greeting
+            socketTimeout: 10000,    // 10 seconds for socket operations
         });
 
         // Use GIF logo for better visual appeal

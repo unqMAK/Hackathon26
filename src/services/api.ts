@@ -1,9 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
-
+// Use relative URL so it works in both development (via Vite proxy) and production
 export const api = axios.create({
-    baseURL: API_URL,
+    baseURL: '/api',
     headers: {
         'Content-Type': 'application/json',
     },

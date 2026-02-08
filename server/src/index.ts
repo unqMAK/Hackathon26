@@ -75,16 +75,24 @@ app.use('/api/problem-applications', problemApplicationRoutes);
 import problemSelectionRoutes from './routes/problemSelectionRoutes';
 app.use('/api/problem-selection', problemSelectionRoutes);
 
-// Serve static certificates
+// Serve static certificates and uploads
 import path from 'path';
 app.use('/certificates', express.static(path.join(__dirname, '../public/certificates')));
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
 
+// Serve Frontend Static Files (Production)
+app.use(express.static(path.join(__dirname, '../../dist')));
+
 app.use('/api/public', publicRoutes);
 
-// Routes Placeholder
-app.get('/', (req, res) => {
+// API Health Check
+app.get('/api/health', (req, res) => {
     res.send('API is running...');
+});
+
+// SPA Fallback - Serve index.html for any other route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../dist/index.html'));
 });
 
 // Error Handling Middleware

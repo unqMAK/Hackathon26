@@ -364,9 +364,14 @@ export const getAdminAnnouncements = async (req: Request, res: Response) => {
 export const getPublicAnnouncements = async (req: Request, res: Response) => {
     try {
         // Only get announcements meant for all users (public) AND meant for home page display
+        // Also include legacy announcements that don't have displayLocation set (treat as 'both')
         const announcements = await Announcement.find({
             audience: 'all',
-            displayLocation: { $in: ['home', 'both'] }
+            $or: [
+                { displayLocation: { $in: ['home', 'both'] } },
+                { displayLocation: { $exists: false } },
+                { displayLocation: null }
+            ]
         })
             .select('title message type createdAt displayLocation')
             .sort({ createdAt: -1 })
