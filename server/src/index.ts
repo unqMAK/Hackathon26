@@ -75,6 +75,12 @@ app.use('/api/problem-applications', problemApplicationRoutes);
 import problemSelectionRoutes from './routes/problemSelectionRoutes';
 app.use('/api/problem-selection', problemSelectionRoutes);
 
+import faqRoutes from './routes/faqRoutes';
+app.use('/api/faqs', faqRoutes);
+
+import videoRoutes from './routes/videoRoutes';
+app.use('/api/videos', videoRoutes);
+
 // Serve static certificates and uploads
 import path from 'path';
 app.use('/certificates', express.static(path.join(__dirname, '../public/certificates')));

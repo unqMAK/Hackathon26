@@ -70,6 +70,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           { icon: Award, label: 'Publish Results', path: '/admin/results-settings' },
           { icon: Calendar, label: 'Timeline', path: '/admin/timeline' },
           { icon: Megaphone, label: 'Announcements', path: '/admin/announcements' },
+          { icon: MessageSquare, label: 'FAQs', path: '/admin/faqs' },
           { icon: Settings, label: 'Settings', path: '/admin/settings' },
           { icon: Award, label: 'Certificates', path: '/admin/certificates/builder' },
           { icon: FileText, label: 'Generate Certs', path: '/admin/certificates/generate' },

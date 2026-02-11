@@ -17,11 +17,11 @@ const Guidelines = () => {
       link: '/assets/MITVPU-Team-Authorization-Letter-2026.docx',
     },
     {
-      title: 'Idea Presentation Template',
-      description: 'PowerPoint template for idea submission',
+      title: 'Idea Submission Template',
+      description: 'Document template for idea submission',
       gradient: 'from-teal-500 to-green-500',
       icon: FileText,
-      link: '/assets/MITVPU-SAMVED-Idea-Presentation-Template.pptx',
+      link: '/assets/MITVPU-SAMVED-Idea-Submission-Template.docx',
     },
     {
       title: 'Hackathon Rulebook',

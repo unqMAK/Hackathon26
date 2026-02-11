@@ -42,6 +42,7 @@ import ResultsDashboard from "./pages/admin/ResultsDashboard";
 import AdminResultsSettings from "./pages/admin/AdminResultsSettings";
 import AdminTimelinePage from "./pages/admin/AdminTimelinePage";
 import AdminApplicationsPage from "./pages/admin/AdminApplicationsPage";
+import AdminFAQsPage from "./pages/admin/AdminFAQsPage";
 
 import PublicLeaderboard from "./pages/PublicLeaderboard";
 
@@ -274,6 +275,14 @@ const App = () => (
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <AdminPasswordResetPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/faqs"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminFAQsPage />
               </ProtectedRoute>
             }
           />

@@ -1,79 +1,33 @@
+import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
+import { Loader2 } from 'lucide-react';
+
+interface FAQ {
+  _id: string;
+  question: string;
+  answer: string;
+  section: string;
+  order: number;
+}
 
 const FAQs = () => {
-  const faqs = [
-    {
-      question: 'Who can participate in the hackathon?',
-      answer: 'The hackathon is open to students from all colleges and universities. Teams can have 4-6 members from the same institute.'
-    },
-    {
-      question: 'Is there a registration fee?',
-      answer: 'No, participation in the MIT Vishwaprayag University Hackathon is completely free. There are no registration or participation fees.'
-    },
-    {
-      question: 'What is the hackathon duration?',
-      answer: 'The hackathon is a 48-hour continuous event. Teams will have 2 full days to develop their solutions from scratch.'
-    },
-    {
-      question: 'Do I need to have a team before registering?',
-      answer: 'Yes, you need to form a team of 4-5 members before registration. All team members must be from the same institute.'
-    },
-    {
-      question: 'Can I participate remotely?',
-      answer: 'The hackathon will be conducted in-person at MIT-VPU campus. Remote participation may be considered on a case-by-case basis.'
-    },
-    {
-      question: 'What should we bring to the hackathon?',
-      answer: 'Bring your laptops, chargers, required software installations, and any hardware components if needed. Food and basic amenities will be provided.'
-    },
-    {
-      question: 'Are there any specific technologies we must use?',
-      answer: 'No, you are free to use any technology stack, programming language, or framework that best suits your problem statement.'
-    },
-    {
-      question: 'How will projects be evaluated?',
-      answer: 'Projects will be judged based on Innovation (25%), Technical Implementation (25%), Impact & Feasibility (20%), Presentation (15%), and Completion (15%).'
-    },
-    {
-      question: 'What are the prizes?',
-      answer: 'The total prize pool is ₹5 Lakh+, with prizes for top 3 teams, best innovation, and various category awards.'
-    },
-    {
-      question: 'Can we use pre-written code?',
-      answer: 'You can use open-source libraries and frameworks, but the core application logic must be developed during the hackathon period.'
-    },
-    {
-      question: 'Will mentors be available during the hackathon?',
-      answer: 'Yes, experienced mentors from industry and academia will be available throughout to guide teams.'
-    },
-    {
-      question: 'What is the role of a SPOC?',
-      answer: 'SPOC (Single Point of Contact) is a faculty member from each institute who coordinates and manages all teams from their institution.'
-    },
-    {
-      question: 'How do we submit our project?',
-      answer: 'Submissions include a working demo, documentation, GitHub repository, and a 5-minute video demonstration, all submitted through the portal.'
-    },
-    {
-      question: 'What happens after Round 1?',
-      answer: 'Shortlisted teams from Round 1 advance to Round 2 for detailed evaluation, followed by a grand finale with presentations.'
-    },
-    {
-      question: 'Will accommodation be provided?',
-      answer: 'Accommodation arrangements can be made for outstation teams. Please contact the organizing committee for details.'
-    },
-  ];
+  const { data, isLoading, isError } = useQuery<{ faqs: FAQ[]; grouped: { [key: string]: FAQ[] } }>({
+    queryKey: ['publicFaqs'],
+    queryFn: async () => {
+      const response = await api.get('/faqs');
+      return response.data;
+    }
+  });
 
-  const categories = [
-    { title: 'General', range: [0, 4] },
-    { title: 'Technical', range: [5, 9] },
-    { title: 'Evaluation', range: [10, 14] },
-  ];
+  const grouped = data?.grouped || {};
+  const sections = Object.keys(grouped);
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,27 +43,43 @@ const FAQs = () => {
           </p>
         </div>
 
-        {categories.map((category, catIndex) => (
-          <div key={catIndex} className="mb-12 animate-slide-up" style={{ animationDelay: `${catIndex * 0.1}s` }}>
-            <h2 className="text-2xl font-bold mb-6 gradient-text-orange">{category.title} Questions</h2>
-            <Card className="border-0 shadow-lg">
-              <CardContent className="p-6">
-                <Accordion type="single" collapsible className="w-full">
-                  {faqs.slice(category.range[0], category.range[1] + 1).map((faq, index) => (
-                    <AccordionItem key={index} value={`item-${category.range[0] + index}`}>
-                      <AccordionTrigger className="text-left hover:text-primary">
-                        {faq.question}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-muted-foreground leading-relaxed">
-                        {faq.answer}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              </CardContent>
-            </Card>
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading FAQs...</p>
           </div>
-        ))}
+        ) : isError ? (
+          <div className="text-center py-20">
+            <p className="text-red-600 text-lg mb-4">Failed to load FAQs. Please try again later.</p>
+            <Button variant="outline" onClick={() => window.location.reload()}>Retry</Button>
+          </div>
+        ) : sections.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-muted-foreground text-lg">No FAQs available at the moment.</p>
+          </div>
+        ) : (
+          sections.map((section, catIndex) => (
+            <div key={catIndex} className="mb-12 animate-slide-up" style={{ animationDelay: `${catIndex * 0.1}s` }}>
+              <h2 className="text-2xl font-bold mb-6 gradient-text-orange">{section} Questions</h2>
+              <Card className="border-0 shadow-lg">
+                <CardContent className="p-6">
+                  <Accordion type="single" collapsible className="w-full">
+                    {grouped[section].map((faq, index) => (
+                      <AccordionItem key={faq._id} value={`item-${catIndex}-${index}`}>
+                        <AccordionTrigger className="text-left hover:text-primary">
+                          {faq.question}
+                        </AccordionTrigger>
+                        <AccordionContent className="text-muted-foreground leading-relaxed">
+                          {faq.answer}
+                        </AccordionContent>
+                      </AccordionItem>
+                    ))}
+                  </Accordion>
+                </CardContent>
+              </Card>
+            </div>
+          ))
+        )}
 
         <div className="wave-bg rounded-2xl p-8 md:p-12 text-center mt-12 min-h-[250px] flex flex-col justify-center">
           <h2 className="text-3xl font-bold mb-4">Still have questions?</h2>

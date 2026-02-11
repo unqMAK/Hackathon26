@@ -7,6 +7,9 @@ export interface IProblem extends Document {
     difficulty: 'Easy' | 'Medium' | 'Hard';
     tags: string[];
     type: 'Software' | 'Hardware' | 'Both';
+    youtubeLink?: string;
+    representativeName?: string;
+    representativeDesignation?: string;
 }
 
 const ProblemSchema: Schema = new Schema({
@@ -26,7 +29,10 @@ const ProblemSchema: Schema = new Schema({
         type: String,
         enum: ['Software', 'Hardware', 'Both'],
         default: 'Both'
-    }
+    },
+    youtubeLink: { type: String, default: '' },
+    representativeName: { type: String, default: '' },
+    representativeDesignation: { type: String, default: '' }
 }, {
     timestamps: true
 });

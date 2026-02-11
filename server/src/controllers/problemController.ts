@@ -80,3 +80,25 @@ export const getProblemById = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server Error' });
     }
 };
+
+export const updateProblem = async (req: Request, res: Response) => {
+    try {
+        const problem = await Problem.findById(req.params.id);
+        if (!problem) {
+            return res.status(404).json({ message: 'Problem not found' });
+        }
+
+        const allowedFields = ['title', 'description', 'category', 'difficulty', 'tags', 'type', 'youtubeLink', 'representativeName', 'representativeDesignation'];
+        for (const field of allowedFields) {
+            if (req.body[field] !== undefined) {
+                (problem as any)[field] = req.body[field];
+            }
+        }
+
+        const updated = await problem.save();
+        res.json(updated);
+    } catch (error: any) {
+        console.error('Error updating problem:', error);
+        res.status(400).json({ message: error.message || 'Failed to update problem' });
+    }
+};

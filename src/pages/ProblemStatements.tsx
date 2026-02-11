@@ -9,8 +9,21 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Search, AlertCircle, RefreshCw } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import api from '@/lib/api';
 
 import { useProblems } from '@/hooks/useMockData';
+
+interface VideoItem {
+  _id: string;
+  youtubeLink: string;
+  title: string;
+  representativeName: string;
+  representativeDesignation: string;
+  problemStatements: { problemId: string; problemTitle: string }[];
+  isActive: boolean;
+  order: number;
+}
 
 interface Problem {
   id: string;
@@ -25,6 +38,8 @@ interface Problem {
   department: string;
   theme: string;
   youtubeLink?: string;
+  representativeName?: string;
+  representativeDesignation?: string;
   datasetLink?: string;
   contactInfo: string;
   teamCount?: number;
@@ -49,10 +64,22 @@ const ProblemStatements = () => {
     department: p.department || 'Computer Science',
     theme: p.theme || 'General',
     youtubeLink: p.youtubeLink,
+    representativeName: p.representativeName,
+    representativeDesignation: p.representativeDesignation,
     datasetLink: p.datasetLink,
     contactInfo: p.contactInfo || 'hackathon@mitwpu.edu.in',
     teamCount: p.teamCount || 0
   }));
+
+  // Fetch videos from dedicated Video API
+  const { data: videosData } = useQuery<{ videos: VideoItem[] }>({
+    queryKey: ['publicVideos'],
+    queryFn: async () => {
+      const response = await api.get('/videos');
+      return response.data;
+    }
+  });
+  const videos = videosData?.videos || [];
 
 
   const getDifficultyColor = (difficulty: string) => {
@@ -373,6 +400,81 @@ const ProblemStatements = () => {
 
         {/* All Problems Section */}
         <ProblemTable problems={filteredProblems} />
+
+        {/* ===== SMC Department Briefings Video Section ===== */}
+        {videos.length > 0 && (
+          <section className="mt-16 mb-8">
+            {/* Section Header */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#8B2A3B]/10 to-[#E25A2C]/10 rounded-full border border-[#8B2A3B]/20 mb-4">
+                <span className="text-sm font-bold text-[#8B2A3B] tracking-wider uppercase">🏛️ Official Department Briefings</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                SMC Representatives{' '}
+                <span className="bg-gradient-to-r from-[#8B2A3B] to-[#E25A2C] bg-clip-text text-transparent">Explain the Challenges</span>
+              </h2>
+              <p className="text-gray-600 max-w-2xl mx-auto text-lg">
+                Hear directly from Solapur Municipal Corporation's department heads as they describe the real-world challenges your solutions will address.
+              </p>
+            </div>
+
+            {/* Video Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {videos.map((video) => (
+                <div
+                  key={video._id}
+                  className="group relative bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 border-2 border-gray-100 hover:border-[#8B2A3B]/30"
+                >
+                  {/* Gradient Top Bar */}
+                  <div className="h-1.5 bg-gradient-to-r from-[#8B2A3B] via-[#a53549] to-[#E25A2C]"></div>
+
+                  {/* Video Embed */}
+                  <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                    <iframe
+                      className="absolute inset-0 w-full h-full"
+                      src={video.youtubeLink}
+                      title={video.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+
+                  {/* Info Section */}
+                  <div className="p-5">
+                    {/* Representative Badge */}
+                    {video.representativeName && (
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8B2A3B] to-[#E25A2C] flex items-center justify-center text-white font-bold text-sm shadow-md">
+                          {video.representativeName.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-sm">{video.representativeName}</p>
+                          <p className="text-xs text-gray-500 leading-tight">{video.representativeDesignation}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Video Display Title */}
+                    <p className="text-sm font-semibold text-gray-800 leading-snug mb-2">
+                      {video.title}
+                    </p>
+
+                    {/* Tagged Problem Statements */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {video.problemStatements.map((ps) => (
+                        <Badge key={ps.problemId} variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200">
+                          {ps.problemTitle}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
 
       </div>

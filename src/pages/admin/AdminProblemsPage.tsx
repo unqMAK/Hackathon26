@@ -3,6 +3,7 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -23,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2 } from 'lucide-react';
+import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2, Pencil, Save, Video, X, Plus, Trash2 } from 'lucide-react';
 import { useProblems } from '@/hooks/useMockData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -72,6 +73,17 @@ interface SelectionData {
     teamsWithSelection: number;
 }
 
+interface VideoItem {
+    _id: string;
+    youtubeLink: string;
+    title: string;
+    representativeName: string;
+    representativeDesignation: string;
+    problemStatements: { problemId: string; problemTitle: string }[];
+    isActive: boolean;
+    order: number;
+}
+
 const AdminProblemsPage = () => {
     const { data: problems = [] } = useProblems();
     const queryClient = useQueryClient();
@@ -81,6 +93,18 @@ const AdminProblemsPage = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
 
+    // Video form state
+    const [isVideoCreateOpen, setIsVideoCreateOpen] = useState(false);
+    const [isVideoEditOpen, setIsVideoEditOpen] = useState(false);
+    const [isVideoDeleteOpen, setIsVideoDeleteOpen] = useState(false);
+    const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+    const [videoFormTitle, setVideoFormTitle] = useState('');
+    const [videoFormLink, setVideoFormLink] = useState('');
+    const [videoFormRepName, setVideoFormRepName] = useState('');
+    const [videoFormRepDesignation, setVideoFormRepDesignation] = useState('');
+    const [videoFormIsActive, setVideoFormIsActive] = useState(true);
+    const [videoFormProblemTags, setVideoFormProblemTags] = useState<{ problemId: string; problemTitle: string }[]>([]);
+
     // Fetch selection data
     const { data: selectionData, isLoading: selectionsLoading } = useQuery<SelectionData>({
         queryKey: ['adminProblemSelections'],
@@ -89,6 +113,16 @@ const AdminProblemsPage = () => {
             return response.data;
         }
     });
+
+    // Fetch videos
+    const { data: videosData, isLoading: videosLoading } = useQuery<{ videos: VideoItem[] }>({
+        queryKey: ['adminVideos'],
+        queryFn: async () => {
+            const response = await api.get('/videos/admin');
+            return response.data;
+        }
+    });
+    const videos = videosData?.videos || [];
 
     // Toggle selection window mutation
     const toggleMutation = useMutation({
@@ -110,6 +144,136 @@ const AdminProblemsPage = () => {
         setIsViewDialogOpen(true);
     };
 
+    // ===== Video CRUD =====
+    const createVideoMutation = useMutation({
+        mutationFn: async (data: any) => {
+            const response = await api.post('/videos', data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['adminVideos'] });
+            queryClient.invalidateQueries({ queryKey: ['publicVideos'] });
+            toast.success('Video created successfully');
+            setIsVideoCreateOpen(false);
+            resetVideoForm();
+        },
+        onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to create video')
+    });
+
+    const updateVideoMutation = useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: any }) => {
+            const response = await api.put(`/videos/${id}`, data);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['adminVideos'] });
+            queryClient.invalidateQueries({ queryKey: ['publicVideos'] });
+            toast.success('Video updated successfully');
+            setIsVideoEditOpen(false);
+            resetVideoForm();
+        },
+        onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to update video')
+    });
+
+    const deleteVideoMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.delete(`/videos/${id}`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['adminVideos'] });
+            queryClient.invalidateQueries({ queryKey: ['publicVideos'] });
+            toast.success('Video deleted successfully');
+            setIsVideoDeleteOpen(false);
+            setSelectedVideo(null);
+        },
+        onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to delete video')
+    });
+
+    const toggleVideoMutation = useMutation({
+        mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+            const response = await api.put(`/videos/${id}`, { isActive });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['adminVideos'] });
+            queryClient.invalidateQueries({ queryKey: ['publicVideos'] });
+        },
+        onError: (error: any) => toast.error(error.response?.data?.message || 'Failed to toggle video')
+    });
+
+    const resetVideoForm = () => {
+        setVideoFormTitle('');
+        setVideoFormLink('');
+        setVideoFormRepName('');
+        setVideoFormRepDesignation('');
+        setVideoFormIsActive(true);
+        setVideoFormProblemTags([]);
+    };
+
+    const handleCreateVideo = () => {
+        resetVideoForm();
+        setIsVideoCreateOpen(true);
+    };
+
+    const handleEditVideo = (video: VideoItem) => {
+        setSelectedVideo(video);
+        setVideoFormTitle(video.title);
+        setVideoFormLink(video.youtubeLink);
+        setVideoFormRepName(video.representativeName);
+        setVideoFormRepDesignation(video.representativeDesignation);
+        setVideoFormIsActive(video.isActive);
+        setVideoFormProblemTags([...video.problemStatements]);
+        setIsVideoEditOpen(true);
+    };
+
+    const handleDeleteVideo = (video: VideoItem) => {
+        setSelectedVideo(video);
+        setIsVideoDeleteOpen(true);
+    };
+
+    const handleSubmitCreateVideo = () => {
+        if (!videoFormTitle.trim() || !videoFormLink.trim()) {
+            toast.error('Title and YouTube link are required');
+            return;
+        }
+        createVideoMutation.mutate({
+            title: videoFormTitle,
+            youtubeLink: videoFormLink,
+            representativeName: videoFormRepName,
+            representativeDesignation: videoFormRepDesignation,
+            isActive: videoFormIsActive,
+            problemStatements: videoFormProblemTags
+        });
+    };
+
+    const handleSubmitEditVideo = () => {
+        if (!selectedVideo || !videoFormTitle.trim() || !videoFormLink.trim()) {
+            toast.error('Title and YouTube link are required');
+            return;
+        }
+        updateVideoMutation.mutate({
+            id: selectedVideo._id,
+            data: {
+                title: videoFormTitle,
+                youtubeLink: videoFormLink,
+                representativeName: videoFormRepName,
+                representativeDesignation: videoFormRepDesignation,
+                isActive: videoFormIsActive,
+                problemStatements: videoFormProblemTags
+            }
+        });
+    };
+
+    const addProblemTag = (problemId: string, problemTitle: string) => {
+        if (videoFormProblemTags.some(t => t.problemId === problemId)) return;
+        setVideoFormProblemTags(prev => [...prev, { problemId, problemTitle }]);
+    };
+
+    const removeProblemTag = (problemId: string) => {
+        setVideoFormProblemTags(prev => prev.filter(t => t.problemId !== problemId));
+    };
+
     const filteredProblems = problems.filter((problem) => {
         const matchesSearch = problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (problem.tags && problem.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
@@ -119,13 +283,89 @@ const AdminProblemsPage = () => {
 
     const categories = Array.from(new Set(problems.map(p => p.category)));
 
+    // Video form dialog (shared between create and edit)
+    const videoFormContent = (
+        <div className="space-y-4 py-4">
+            <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Display Title *</label>
+                <Input
+                    placeholder="e.g. Smart Road Damage Reporting & Rapid Response System"
+                    value={videoFormTitle}
+                    onChange={(e) => setVideoFormTitle(e.target.value)}
+                />
+            </div>
+            <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">YouTube Embed URL *</label>
+                <Input
+                    placeholder="https://www.youtube.com/embed/..."
+                    value={videoFormLink}
+                    onChange={(e) => setVideoFormLink(e.target.value)}
+                />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+                <div>
+                    <label className="text-sm font-semibold text-gray-700 mb-1 block">Representative Name</label>
+                    <Input
+                        placeholder="e.g. Mr. Satish Ekbote"
+                        value={videoFormRepName}
+                        onChange={(e) => setVideoFormRepName(e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label className="text-sm font-semibold text-gray-700 mb-1 block">Representative Designation</label>
+                    <Input
+                        placeholder="e.g. Assistant Manager, SMC"
+                        value={videoFormRepDesignation}
+                        onChange={(e) => setVideoFormRepDesignation(e.target.value)}
+                    />
+                </div>
+            </div>
+
+            {/* Problem Statement Tags */}
+            <div>
+                <label className="text-sm font-semibold text-gray-700 mb-1 block">Tagged Problem Statements</label>
+                <div className="flex flex-wrap gap-1.5 mb-2 min-h-[32px] p-2 bg-gray-50 rounded-lg border">
+                    {videoFormProblemTags.length === 0 && (
+                        <span className="text-xs text-gray-400 italic">No problem statements tagged. Select from below.</span>
+                    )}
+                    {videoFormProblemTags.map((tag) => (
+                        <Badge key={tag.problemId} className="bg-purple-100 text-purple-700 border-purple-200 gap-1">
+                            {tag.problemTitle.length > 40 ? tag.problemTitle.slice(0, 40) + '...' : tag.problemTitle}
+                            <X className="h-3 w-3 cursor-pointer hover:text-red-600" onClick={() => removeProblemTag(tag.problemId)} />
+                        </Badge>
+                    ))}
+                </div>
+                <Select onValueChange={(val) => {
+                    const problem = problems.find(p => (p._id || p.id) === val);
+                    if (problem) addProblemTag(problem._id || problem.id, problem.title);
+                }}>
+                    <SelectTrigger className="text-sm">
+                        <SelectValue placeholder="Select a problem statement to tag..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {problems.map((p, i) => (
+                            <SelectItem key={p._id || p.id || i} value={p._id || p.id}>
+                                ID-{String(i + 1).padStart(2, '0')}: {p.title}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold text-gray-700">Active</label>
+                <Switch checked={videoFormIsActive} onCheckedChange={setVideoFormIsActive} />
+            </div>
+        </div>
+    );
+
     return (
         <DashboardLayout role="admin">
             <div className="space-y-6 animate-fade-in">
                 <div className="flex items-center justify-between">
                     <div>
                         <h2 className="text-3xl font-bold tracking-tight">Problem Statements</h2>
-                        <p className="text-muted-foreground">Manage problem statements and team selections.</p>
+                        <p className="text-muted-foreground">Manage problem statements, team selections, and videos.</p>
                     </div>
                 </div>
 
@@ -135,22 +375,20 @@ const AdminProblemsPage = () => {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                                 {selectionData?.isSelectionOpen ? (
-                                    <Unlock className="h-6 w-6 text-green-600" />
+                                    <Unlock className="h-5 w-5 text-green-600" />
                                 ) : (
-                                    <Lock className="h-6 w-6 text-red-600" />
+                                    <Lock className="h-5 w-5 text-red-600" />
                                 )}
                                 <div>
-                                    <p className="font-semibold">
-                                        Problem Selection Window: {selectionData?.isSelectionOpen ? 'Open' : 'Closed'}
-                                    </p>
+                                    <p className="font-semibold">Problem Selection Window</p>
                                     <p className="text-sm text-muted-foreground">
                                         {selectionData?.isSelectionOpen
-                                            ? 'Students can select or change their problem statement'
-                                            : 'Students cannot change their problem selection'}
+                                            ? 'Teams can currently select their problem statements.'
+                                            : 'Problem selection is currently closed.'}
                                     </p>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
                                 <span className="text-sm font-medium">
                                     {selectionData?.isSelectionOpen ? 'Open' : 'Closed'}
                                 </span>
@@ -201,11 +439,14 @@ const AdminProblemsPage = () => {
                     </Card>
                 </div>
 
-                {/* Tabs for Problems / Team Selections */}
+                {/* Tabs for Problems / Team Selections / Videos */}
                 <Tabs defaultValue="selections" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="selections">Team Selections</TabsTrigger>
                         <TabsTrigger value="problems">Problem Statements</TabsTrigger>
+                        <TabsTrigger value="videos" className="flex items-center gap-1.5">
+                            <Video className="h-4 w-4" /> Videos
+                        </TabsTrigger>
                     </TabsList>
 
                     {/* Team Selections Tab */}
@@ -445,10 +686,134 @@ const AdminProblemsPage = () => {
                             </Table>
                         </div>
                     </TabsContent>
+
+                    {/* ===== Videos Tab ===== */}
+                    <TabsContent value="videos" className="space-y-4">
+                        {/* Video Stats */}
+                        <div className="grid gap-4 md:grid-cols-3">
+                            <Card>
+                                <CardContent className="pt-4">
+                                    <div className="flex items-center gap-3">
+                                        <Video className="h-8 w-8 text-blue-600" />
+                                        <div>
+                                            <p className="text-2xl font-bold">{videos.length}</p>
+                                            <p className="text-sm text-muted-foreground">Total Videos</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="border-green-200 bg-green-50/30">
+                                <CardContent className="pt-4">
+                                    <div className="flex items-center gap-3">
+                                        <Video className="h-8 w-8 text-green-600" />
+                                        <div>
+                                            <p className="text-2xl font-bold text-green-700">{videos.filter(v => v.isActive).length}</p>
+                                            <p className="text-sm text-green-600">Active Videos</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="border-purple-200 bg-purple-50/30">
+                                <CardContent className="pt-4">
+                                    <div className="flex items-center gap-3">
+                                        <Video className="h-8 w-8 text-purple-600" />
+                                        <div>
+                                            <p className="text-2xl font-bold text-purple-700">{videos.filter(v => !v.isActive).length}</p>
+                                            <p className="text-sm text-purple-600">Inactive Videos</p>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Add Video Button */}
+                        <div className="flex justify-end">
+                            <Button onClick={handleCreateVideo} className="bg-[#8B2A3B] hover:bg-[#6d2130] text-white">
+                                <Plus className="h-4 w-4 mr-2" /> Add Video
+                            </Button>
+                        </div>
+
+                        {/* Videos Table */}
+                        {videosLoading ? (
+                            <Card>
+                                <CardContent className="py-12 text-center">
+                                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                                    <p className="mt-2 text-muted-foreground">Loading videos...</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="rounded-md border bg-card">
+                                <Table>
+                                    <TableHeader className="bg-gray-50/50">
+                                        <TableRow>
+                                            <TableHead className="w-[50px] font-bold">#</TableHead>
+                                            <TableHead className="font-bold">Title</TableHead>
+                                            <TableHead className="font-bold">Representative</TableHead>
+                                            <TableHead className="font-bold">Problem Tags</TableHead>
+                                            <TableHead className="font-bold">Status</TableHead>
+                                            <TableHead className="text-right font-bold">Actions</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {videos.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                                                    No videos found. Click "Add Video" to create one.
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            videos.map((video, index) => (
+                                                <TableRow key={video._id} className={!video.isActive ? 'opacity-50' : ''}>
+                                                    <TableCell className="font-medium">{index + 1}</TableCell>
+                                                    <TableCell>
+                                                        <p className="font-semibold text-sm">{video.title}</p>
+                                                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">{video.youtubeLink}</p>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <p className="text-sm font-medium">{video.representativeName || '—'}</p>
+                                                        <p className="text-xs text-muted-foreground">{video.representativeDesignation || ''}</p>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-wrap gap-1 max-w-[200px]">
+                                                            {video.problemStatements.length === 0 ? (
+                                                                <span className="text-xs text-gray-400 italic">No tags</span>
+                                                            ) : (
+                                                                video.problemStatements.map((ps) => (
+                                                                    <Badge key={ps.problemId} variant="outline" className="text-[10px] bg-purple-50 text-purple-700 border-purple-200">
+                                                                        {ps.problemTitle.length > 30 ? ps.problemTitle.slice(0, 30) + '...' : ps.problemTitle}
+                                                                    </Badge>
+                                                                ))
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Switch
+                                                            checked={video.isActive}
+                                                            onCheckedChange={(checked) => toggleVideoMutation.mutate({ id: video._id, isActive: checked })}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex justify-end gap-2">
+                                                            <Button variant="outline" size="sm" onClick={() => handleEditVideo(video)}>
+                                                                <Pencil className="h-3 w-3" />
+                                                            </Button>
+                                                            <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => handleDeleteVideo(video)}>
+                                                                <Trash2 className="h-3 w-3" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        )}
+                    </TabsContent>
                 </Tabs>
             </div>
 
-            {/* View Details Dialog */}
+            {/* View Problem Details Dialog (simplified - no video editing here) */}
             <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
                 <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                     <DialogHeader>
@@ -493,6 +858,65 @@ const AdminProblemsPage = () => {
 
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Create Video Dialog */}
+            <Dialog open={isVideoCreateOpen} onOpenChange={setIsVideoCreateOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Add New Video</DialogTitle>
+                        <DialogDescription>Add a new SMC department briefing video.</DialogDescription>
+                    </DialogHeader>
+                    {videoFormContent}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsVideoCreateOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSubmitCreateVideo} disabled={createVideoMutation.isPending}
+                            className="bg-[#8B2A3B] hover:bg-[#6d2130] text-white">
+                            {createVideoMutation.isPending ? 'Creating...' : 'Create Video'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Edit Video Dialog */}
+            <Dialog open={isVideoEditOpen} onOpenChange={setIsVideoEditOpen}>
+                <DialogContent className="max-w-lg">
+                    <DialogHeader>
+                        <DialogTitle>Edit Video</DialogTitle>
+                        <DialogDescription>Update video details and problem statement tags.</DialogDescription>
+                    </DialogHeader>
+                    {videoFormContent}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsVideoEditOpen(false)}>Cancel</Button>
+                        <Button onClick={handleSubmitEditVideo} disabled={updateVideoMutation.isPending}
+                            className="bg-[#8B2A3B] hover:bg-[#6d2130] text-white">
+                            {updateVideoMutation.isPending ? 'Saving...' : 'Save Changes'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Video Confirmation Dialog */}
+            <Dialog open={isVideoDeleteOpen} onOpenChange={setIsVideoDeleteOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete Video</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete this video? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 px-2 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="font-semibold text-red-800 text-sm">{selectedVideo?.title}</p>
+                        <p className="text-xs text-red-600 mt-1">{selectedVideo?.representativeName}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsVideoDeleteOpen(false)}>Cancel</Button>
+                        <Button variant="destructive" onClick={() => selectedVideo && deleteVideoMutation.mutate(selectedVideo._id)}
+                            disabled={deleteVideoMutation.isPending}>
+                            {deleteVideoMutation.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
