@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2, Pencil, Save, Video, X, Plus, Trash2 } from 'lucide-react';
+import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2, Pencil, Save, Video, X, Plus, Trash2, Lightbulb, CheckCircle, XCircle, Clock, ExternalLink, Eye, FileText, Youtube, Download } from 'lucide-react';
 import { useProblems } from '@/hooks/useMockData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -84,6 +84,21 @@ interface VideoItem {
     order: number;
 }
 
+interface IdeaSubmissionItem {
+    _id: string;
+    teamId: { _id: string; name: string; instituteName: string; instituteCode: string };
+    problemId: { _id: string; title: string; category: string };
+    youtubeVideoLink: string;
+    documentOriginalName: string;
+    hasDocument: boolean;
+    status: 'pending' | 'approved' | 'rejected';
+    reviewedBy?: { name: string };
+    reviewNote?: string;
+    reviewedAt?: string;
+    submittedBy?: { name: string; email: string };
+    createdAt: string;
+}
+
 const AdminProblemsPage = () => {
     const { data: problems = [] } = useProblems();
     const queryClient = useQueryClient();
@@ -92,6 +107,12 @@ const AdminProblemsPage = () => {
     const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('all');
+
+    // Idea Submissions state
+    const [ideaPsFilter, setIdeaPsFilter] = useState<string>('all');
+    const [ideaReviewDialogOpen, setIdeaReviewDialogOpen] = useState(false);
+    const [selectedIdeaSubmission, setSelectedIdeaSubmission] = useState<IdeaSubmissionItem | null>(null);
+    const [reviewNote, setReviewNote] = useState('');
 
     // Video form state
     const [isVideoCreateOpen, setIsVideoCreateOpen] = useState(false);
@@ -283,6 +304,104 @@ const AdminProblemsPage = () => {
 
     const categories = Array.from(new Set(problems.map(p => p.category)));
 
+    // ==================== IDEA SUBMISSIONS ====================
+
+    const { data: ideaSubmissions = [], isLoading: ideaLoading } = useQuery<IdeaSubmissionItem[]>({
+        queryKey: ['adminIdeaSubmissions'],
+        queryFn: async () => {
+            const res = await api.get('/idea-submissions/admin');
+            return res.data;
+        }
+    });
+
+    const { data: ideaStats } = useQuery({
+        queryKey: ['adminIdeaStats'],
+        queryFn: async () => {
+            const res = await api.get('/idea-submissions/admin/stats');
+            return res.data;
+        }
+    });
+
+    const reviewIdeaMutation = useMutation({
+        mutationFn: async ({ id, status, reviewNote }: { id: string; status: string; reviewNote: string }) => {
+            const res = await api.put(`/idea-submissions/admin/${id}/review`, { status, reviewNote });
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['adminIdeaSubmissions'] });
+            queryClient.invalidateQueries({ queryKey: ['adminIdeaStats'] });
+            setIdeaReviewDialogOpen(false);
+            setSelectedIdeaSubmission(null);
+            setReviewNote('');
+            toast.success('Submission reviewed successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to review submission');
+        }
+    });
+
+    // Submission window status
+    const { data: submissionWindowData } = useQuery({
+        queryKey: ['submissionWindowStatus'],
+        queryFn: async () => {
+            const res = await api.get('/idea-submissions/submission-status');
+            return res.data;
+        }
+    });
+
+    const toggleSubmissionMutation = useMutation({
+        mutationFn: async (isOpen: boolean) => {
+            const res = await api.post('/idea-submissions/admin/toggle-submission', { isOpen });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['submissionWindowStatus'] });
+            toast.success(data.message);
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to toggle submission window');
+        }
+    });
+
+    // PS color map
+    const psColors: Record<number, { bg: string; text: string; border: string; badge: string }> = {
+        1: { bg: 'bg-yellow-50', text: 'text-yellow-800', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-800 border-yellow-300' },
+        2: { bg: 'bg-green-50', text: 'text-green-800', border: 'border-green-200', badge: 'bg-green-100 text-green-800 border-green-300' },
+        3: { bg: 'bg-blue-50', text: 'text-blue-800', border: 'border-blue-200', badge: 'bg-blue-100 text-blue-800 border-blue-300' },
+        4: { bg: 'bg-pink-50', text: 'text-pink-800', border: 'border-pink-200', badge: 'bg-pink-100 text-pink-800 border-pink-300' },
+        5: { bg: 'bg-purple-50', text: 'text-purple-800', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-800 border-purple-300' }
+    };
+
+    // Get PS index for a given problem (1-based)
+    const getPsIndex = (problemId: string): number => {
+        const idx = problems.findIndex(p => (p as any)._id === problemId);
+        return idx >= 0 ? idx + 1 : 0;
+    };
+
+    // Filter idea submissions
+    const filteredIdeaSubmissions = ideaPsFilter === 'all'
+        ? ideaSubmissions
+        : ideaSubmissions.filter(s => {
+            const idx = getPsIndex(s.problemId?._id);
+            return String(idx) === ideaPsFilter;
+        });
+
+    // Extract YouTube video ID for embedding
+    const getYoutubeEmbedUrl = (url: string): string | null => {
+        try {
+            const parsed = new URL(url);
+            let videoId = '';
+            if (parsed.hostname.includes('youtu.be')) {
+                videoId = parsed.pathname.slice(1);
+            } else {
+                videoId = parsed.searchParams.get('v') || '';
+            }
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+        } catch {
+            return null;
+        }
+    };
+
     // Video form dialog (shared between create and edit)
     const videoFormContent = (
         <div className="space-y-4 py-4">
@@ -439,13 +558,16 @@ const AdminProblemsPage = () => {
                     </Card>
                 </div>
 
-                {/* Tabs for Problems / Team Selections / Videos */}
+                {/* Tabs for Problems / Team Selections / Videos / Idea Submissions */}
                 <Tabs defaultValue="selections" className="w-full">
-                    <TabsList className="grid w-full grid-cols-3">
+                    <TabsList className="grid w-full grid-cols-4">
                         <TabsTrigger value="selections">Team Selections</TabsTrigger>
                         <TabsTrigger value="problems">Problem Statements</TabsTrigger>
                         <TabsTrigger value="videos" className="flex items-center gap-1.5">
                             <Video className="h-4 w-4" /> Videos
+                        </TabsTrigger>
+                        <TabsTrigger value="ideas" className="flex items-center gap-1.5">
+                            <Lightbulb className="h-4 w-4" /> Idea Submissions
                         </TabsTrigger>
                     </TabsList>
 
@@ -810,6 +932,306 @@ const AdminProblemsPage = () => {
                             </div>
                         )}
                     </TabsContent>
+
+                    {/* ==================== IDEA SUBMISSIONS TAB ==================== */}
+                    <TabsContent value="ideas" className="space-y-4">
+                        {ideaLoading ? (
+                            <Card>
+                                <CardContent className="py-12 text-center">
+                                    <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                                    <p className="mt-2 text-muted-foreground">Loading idea submissions...</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <>
+                                {/* Submission Window Toggle */}
+                                <Card className={`border-2 ${submissionWindowData?.isOpen !== false ? 'border-green-200 bg-green-50/30' : 'border-red-200 bg-red-50/30'}`}>
+                                    <CardContent className="py-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                {submissionWindowData?.isOpen !== false ? (
+                                                    <Unlock className="h-5 w-5 text-green-600" />
+                                                ) : (
+                                                    <Lock className="h-5 w-5 text-red-600" />
+                                                )}
+                                                <div>
+                                                    <p className="font-semibold">Idea Submission Portal</p>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        {submissionWindowData?.isOpen !== false
+                                                            ? 'Teams can currently submit their ideas.'
+                                                            : 'Idea submission portal is currently closed.'}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium">
+                                                    {submissionWindowData?.isOpen !== false ? 'Open' : 'Closed'}
+                                                </span>
+                                                <Switch
+                                                    checked={submissionWindowData?.isOpen !== false}
+                                                    onCheckedChange={(checked) => toggleSubmissionMutation.mutate(checked)}
+                                                    disabled={toggleSubmissionMutation.isPending}
+                                                />
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Stats Cards */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <Card className="border-2 border-blue-200">
+                                        <CardContent className="pt-4 pb-3 text-center">
+                                            <p className="text-3xl font-bold text-blue-600">{ideaStats?.total || 0}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Total Submissions</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="border-2 border-amber-200">
+                                        <CardContent className="pt-4 pb-3 text-center">
+                                            <p className="text-3xl font-bold text-amber-600">{ideaStats?.pending || 0}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Pending Review</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="border-2 border-green-200">
+                                        <CardContent className="pt-4 pb-3 text-center">
+                                            <p className="text-3xl font-bold text-green-600">{ideaStats?.approved || 0}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Shortlisted ✅</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="border-2 border-red-200">
+                                        <CardContent className="pt-4 pb-3 text-center">
+                                            <p className="text-3xl font-bold text-red-600">{ideaStats?.rejected || 0}</p>
+                                            <p className="text-xs text-muted-foreground mt-1">Rejected ❌</p>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+
+                                {/* PS Filter Bar */}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="text-sm font-medium text-muted-foreground">Filter by PS:</span>
+                                    <Button
+                                        size="sm"
+                                        variant={ideaPsFilter === 'all' ? 'default' : 'outline'}
+                                        onClick={() => setIdeaPsFilter('all')}
+                                    >
+                                        All
+                                    </Button>
+                                    {problems.map((p: any, i: number) => {
+                                        const colors = psColors[i + 1] || psColors[1];
+                                        return (
+                                            <Button
+                                                key={p._id}
+                                                size="sm"
+                                                variant="outline"
+                                                className={`${ideaPsFilter === String(i + 1) ? colors.bg + ' ' + colors.text + ' ' + colors.border + ' border-2' : ''}`}
+                                                onClick={() => setIdeaPsFilter(String(i + 1))}
+                                            >
+                                                PS{i + 1}
+                                            </Button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Submissions Table */}
+                                {filteredIdeaSubmissions.length === 0 ? (
+                                    <Card>
+                                        <CardContent className="py-12 text-center">
+                                            <Lightbulb className="h-10 w-10 mx-auto text-muted-foreground opacity-50" />
+                                            <p className="mt-3 text-muted-foreground">No idea submissions yet.</p>
+                                        </CardContent>
+                                    </Card>
+                                ) : (
+                                    <div className="border rounded-lg overflow-hidden">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead>Team</TableHead>
+                                                    <TableHead>Problem Statement</TableHead>
+                                                    <TableHead>Document</TableHead>
+                                                    <TableHead>YouTube Video</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                    <TableHead className="text-right">Actions</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {filteredIdeaSubmissions.map((sub) => {
+                                                    const psIdx = getPsIndex(sub.problemId?._id);
+                                                    const colors = psColors[psIdx] || psColors[1];
+                                                    return (
+                                                        <TableRow key={sub._id}>
+                                                            <TableCell>
+                                                                <div>
+                                                                    <p className="font-medium text-sm">{sub.teamId?.name || 'Unknown'}</p>
+                                                                    <p className="text-xs text-muted-foreground">{sub.teamId?.instituteName}</p>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Badge className={colors.badge + ' border'}>
+                                                                    PS{psIdx}: {sub.problemId?.title?.slice(0, 30)}{sub.problemId?.title?.length > 30 ? '...' : ''}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {sub.hasDocument ? (
+                                                                    <div className="flex items-center gap-1">
+                                                                        <span className="inline-flex items-center gap-1 text-xs text-green-700">
+                                                                            <FileText className="h-3 w-3" /> {sub.documentOriginalName?.slice(0, 20)}{sub.documentOriginalName?.length > 20 ? '...' : ''}
+                                                                        </span>
+                                                                        <Button
+                                                                            variant="ghost"
+                                                                            size="sm"
+                                                                            className="h-6 w-6 p-0 text-blue-600 hover:text-blue-800"
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                const token = localStorage.getItem('token');
+                                                                                const link = document.createElement('a');
+                                                                                link.href = `${api.defaults.baseURL}/idea-submissions/admin/${sub._id}/download`;
+                                                                                // Use fetch with auth header for download
+                                                                                fetch(link.href, { headers: { Authorization: `Bearer ${token}` } })
+                                                                                    .then(res => res.blob())
+                                                                                    .then(blob => {
+                                                                                        const url = window.URL.createObjectURL(blob);
+                                                                                        const a = document.createElement('a');
+                                                                                        a.href = url;
+                                                                                        a.download = sub.documentOriginalName || 'document.docx';
+                                                                                        a.click();
+                                                                                        window.URL.revokeObjectURL(url);
+                                                                                    })
+                                                                                    .catch(() => alert('Download failed'));
+                                                                            }}
+                                                                            title="Download document"
+                                                                        >
+                                                                            <Download className="h-3 w-3" />
+                                                                        </Button>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground">No document</span>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="text-red-600 hover:text-red-700 p-0 h-auto"
+                                                                    onClick={() => {
+                                                                        setSelectedIdeaSubmission(sub);
+                                                                        setIdeaReviewDialogOpen(true);
+                                                                        setReviewNote(sub.reviewNote || '');
+                                                                    }}
+                                                                >
+                                                                    <Youtube className="h-4 w-4 mr-1" /> View
+                                                                </Button>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {sub.status === 'pending' && (
+                                                                    <Badge className="bg-amber-100 text-amber-800 border border-amber-300">
+                                                                        <Clock className="h-3 w-3 mr-1" /> Pending
+                                                                    </Badge>
+                                                                )}
+                                                                {sub.status === 'approved' && (
+                                                                    <Badge className="bg-green-100 text-green-800 border border-green-300">
+                                                                        <CheckCircle className="h-3 w-3 mr-1" /> Approved
+                                                                    </Badge>
+                                                                )}
+                                                                {sub.status === 'rejected' && (
+                                                                    <Badge className="bg-red-100 text-red-800 border border-red-300">
+                                                                        <XCircle className="h-3 w-3 mr-1" /> Rejected
+                                                                    </Badge>
+                                                                )}
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="text-green-700 hover:bg-green-50 border-green-300"
+                                                                        onClick={() => reviewIdeaMutation.mutate({ id: sub._id, status: 'approved', reviewNote: '' })}
+                                                                        disabled={sub.status === 'approved' || reviewIdeaMutation.isPending}
+                                                                    >
+                                                                        <CheckCircle className="h-3 w-3 mr-1" /> Approve
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="text-red-700 hover:bg-red-50 border-red-300"
+                                                                        onClick={() => {
+                                                                            setSelectedIdeaSubmission(sub);
+                                                                            setIdeaReviewDialogOpen(true);
+                                                                            setReviewNote(sub.reviewNote || '');
+                                                                        }}
+                                                                        disabled={sub.status === 'rejected' || reviewIdeaMutation.isPending}
+                                                                    >
+                                                                        <XCircle className="h-3 w-3 mr-1" /> Reject
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                )}
+
+                                {/* Shortlisted & Rejected Sections */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Shortlisted Teams */}
+                                    <Card className="border-green-200">
+                                        <CardHeader className="pb-2">
+                                            <CardTitle className="text-sm flex items-center gap-2 text-green-700">
+                                                <CheckCircle className="h-4 w-4" />
+                                                Shortlisted Teams ({ideaSubmissions.filter(s => s.status === 'approved').length})
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {ideaSubmissions.filter(s => s.status === 'approved').length === 0 ? (
+                                                <p className="text-xs text-muted-foreground">No teams shortlisted yet</p>
+                                            ) : (
+                                                <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                    {ideaSubmissions.filter(s => s.status === 'approved').map(s => {
+                                                        const psIdx = getPsIndex(s.problemId?._id);
+                                                        const colors = psColors[psIdx] || psColors[1];
+                                                        return (
+                                                            <div key={s._id} className="flex items-center justify-between py-1 px-2 rounded bg-green-50">
+                                                                <span className="text-sm font-medium">{s.teamId?.name}</span>
+                                                                <Badge className={colors.badge + ' border text-[10px] px-1.5 py-0'}>PS{psIdx}</Badge>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Rejected Teams */}
+                                    <Card className="border-red-200">
+                                        <CardHeader className="pb-2">
+                                            <CardTitle className="text-sm flex items-center gap-2 text-red-700">
+                                                <XCircle className="h-4 w-4" />
+                                                Rejected Teams ({ideaSubmissions.filter(s => s.status === 'rejected').length})
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {ideaSubmissions.filter(s => s.status === 'rejected').length === 0 ? (
+                                                <p className="text-xs text-muted-foreground">No teams rejected</p>
+                                            ) : (
+                                                <div className="space-y-1 max-h-48 overflow-y-auto">
+                                                    {ideaSubmissions.filter(s => s.status === 'rejected').map(s => {
+                                                        const psIdx = getPsIndex(s.problemId?._id);
+                                                        const colors = psColors[psIdx] || psColors[1];
+                                                        return (
+                                                            <div key={s._id} className="flex items-center justify-between py-1 px-2 rounded bg-red-50">
+                                                                <span className="text-sm font-medium">{s.teamId?.name}</span>
+                                                                <Badge className={colors.badge + ' border text-[10px] px-1.5 py-0'}>PS{psIdx}</Badge>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </>
+                        )}
+                    </TabsContent>
                 </Tabs>
             </div>
 
@@ -916,6 +1338,133 @@ const AdminProblemsPage = () => {
                         <Button variant="destructive" onClick={() => selectedVideo && deleteVideoMutation.mutate(selectedVideo._id)}
                             disabled={deleteVideoMutation.isPending}>
                             {deleteVideoMutation.isPending ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Idea Submission Review Dialog */}
+            <Dialog open={ideaReviewDialogOpen} onOpenChange={setIdeaReviewDialogOpen}>
+                <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Lightbulb className="h-5 w-5" />
+                            Review Idea Submission
+                        </DialogTitle>
+                        <DialogDescription>
+                            {selectedIdeaSubmission?.teamId?.name} — {selectedIdeaSubmission?.teamId?.instituteName}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedIdeaSubmission && (
+                        <div className="space-y-4 py-2">
+                            {/* Problem Statement Badge */}
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Problem Statement</p>
+                                {(() => {
+                                    const psIdx = getPsIndex(selectedIdeaSubmission.problemId?._id);
+                                    const colors = psColors[psIdx] || psColors[1];
+                                    return (
+                                        <Badge className={colors.badge + ' border'}>
+                                            PS{psIdx}: {selectedIdeaSubmission.problemId?.title}
+                                        </Badge>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Embedded YouTube Video */}
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">YouTube Video</p>
+                                {(() => {
+                                    const embedUrl = getYoutubeEmbedUrl(selectedIdeaSubmission.youtubeVideoLink);
+                                    return embedUrl ? (
+                                        <div className="aspect-video rounded-lg overflow-hidden border">
+                                            <iframe
+                                                src={embedUrl}
+                                                title="Idea Submission Video"
+                                                className="w-full h-full"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            />
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">Unable to embed video</p>
+                                    );
+                                })()}
+                            </div>
+
+                            {/* Document */}
+                            <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Document</p>
+                                <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                                    <FileText className="h-4 w-4 text-blue-600" />
+                                    <span className="text-sm flex-1">{selectedIdeaSubmission.documentOriginalName}</span>
+                                    {selectedIdeaSubmission.hasDocument && (
+                                        <>
+                                            <Badge variant="outline" className="text-green-700 border-green-300 text-xs">Uploaded to Drive</Badge>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-7 text-xs gap-1"
+                                                onClick={() => {
+                                                    const token = localStorage.getItem('token');
+                                                    fetch(`${api.defaults.baseURL}/idea-submissions/admin/${selectedIdeaSubmission._id}/download`, {
+                                                        headers: { Authorization: `Bearer ${token}` }
+                                                    })
+                                                        .then(res => res.blob())
+                                                        .then(blob => {
+                                                            const url = window.URL.createObjectURL(blob);
+                                                            const a = document.createElement('a');
+                                                            a.href = url;
+                                                            a.download = selectedIdeaSubmission.documentOriginalName || 'document.docx';
+                                                            a.click();
+                                                            window.URL.revokeObjectURL(url);
+                                                        })
+                                                        .catch(() => alert('Download failed'));
+                                                }}
+                                            >
+                                                <Download className="h-3 w-3" /> Download
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Submitted Info */}
+                            <div className="text-xs text-muted-foreground">
+                                <p>Submitted by: {selectedIdeaSubmission.submittedBy?.name} ({selectedIdeaSubmission.submittedBy?.email})</p>
+                                <p>Date: {new Date(selectedIdeaSubmission.createdAt).toLocaleString()}</p>
+                            </div>
+
+                            {/* Review Note */}
+                            <div>
+                                <label className="text-sm font-medium mb-1 block">Review Note (optional)</label>
+                                <Textarea
+                                    placeholder="Add feedback or reason for approval/rejection..."
+                                    value={reviewNote}
+                                    onChange={(e) => setReviewNote(e.target.value)}
+                                    className="min-h-[80px]"
+                                    maxLength={1000}
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter className="flex gap-2">
+                        <Button variant="outline" onClick={() => setIdeaReviewDialogOpen(false)}>Cancel</Button>
+                        <Button
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => selectedIdeaSubmission && reviewIdeaMutation.mutate({ id: selectedIdeaSubmission._id, status: 'approved', reviewNote })}
+                            disabled={reviewIdeaMutation.isPending}
+                        >
+                            <CheckCircle className="h-4 w-4 mr-1" /> Approve
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={() => selectedIdeaSubmission && reviewIdeaMutation.mutate({ id: selectedIdeaSubmission._id, status: 'rejected', reviewNote })}
+                            disabled={reviewIdeaMutation.isPending}
+                        >
+                            <XCircle className="h-4 w-4 mr-1" /> Reject
                         </Button>
                     </DialogFooter>
                 </DialogContent>

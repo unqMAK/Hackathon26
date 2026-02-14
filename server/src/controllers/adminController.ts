@@ -4,6 +4,7 @@ import Institute from '../models/Institute';
 import Team from '../models/Team';
 import Notification from '../models/Notification';
 import emailService from '../services/emailService';
+import IdeaSubmission from '../models/IdeaSubmission';
 
 // Create Admin
 // Create Admin
@@ -803,6 +804,15 @@ export const exportTeamsCSVFlat = async (req: Request, res: Response) => {
             .sort({ createdAt: -1 })
             .lean();
 
+        // Fetch idea submissions to get YouTube links per team
+        const ideaSubmissions = await IdeaSubmission.find({}, 'teamId youtubeVideoLink').lean();
+        const teamYoutubeMap: Record<string, string> = {};
+        for (const sub of ideaSubmissions) {
+            if (sub.teamId && sub.youtubeVideoLink) {
+                teamYoutubeMap[sub.teamId.toString()] = sub.youtubeVideoLink;
+            }
+        }
+
         // CSV Headers matching the exact required format
         const headers = [
             'Sr.No',
@@ -826,6 +836,7 @@ export const exportTeamsCSVFlat = async (req: Request, res: Response) => {
             'State',
             'Problem Statement',
             'Problem Category',
+            'YouTube Video Link',
             'GitHub/Repo Link',
             'Drive/File Links',
             'Other Links',
@@ -891,6 +902,7 @@ export const exportTeamsCSVFlat = async (req: Request, res: Response) => {
                 team.spocState || '',
                 problemTitle,
                 problemCategory,
+                teamYoutubeMap[(team as any)._id?.toString()] || '',
                 '', // GitHub/Repo Link (not in current model)
                 '', // Drive/File Links (not in current model)
                 '', // Other Links (not in current model)
@@ -934,6 +946,15 @@ export const exportTeamsCSVStructured = async (req: Request, res: Response) => {
             .populate('problemId', 'title')
             .sort({ createdAt: -1 })
             .lean();
+
+        // Fetch idea submissions to get YouTube links per team
+        const ideaSubmissions = await IdeaSubmission.find({}, 'teamId youtubeVideoLink').lean();
+        const teamYoutubeMap: Record<string, string> = {};
+        for (const sub of ideaSubmissions) {
+            if (sub.teamId && sub.youtubeVideoLink) {
+                teamYoutubeMap[sub.teamId.toString()] = sub.youtubeVideoLink;
+            }
+        }
 
         // Calculate statistics
         const problemCounts: Record<string, number> = {};
@@ -1036,6 +1057,8 @@ export const exportTeamsCSVStructured = async (req: Request, res: Response) => {
             lines.push(`Problem:,${problem?.title || 'Not Selected'}`);
             lines.push(`Mentor:,${team.mentorName || 'N/A'},${team.mentorEmail || 'N/A'}`);
             lines.push(`SPOC:,${team.spocName || 'N/A'},${team.spocEmail || 'N/A'}`);
+            const ytLink = teamYoutubeMap[(team as any)._id?.toString()] || 'N/A';
+            lines.push(`YouTube Video:,${ytLink}`);
 
             const approvedDate = (team as any).approvedAt
                 ? new Date((team as any).approvedAt).toISOString().split('T')[0]
@@ -1184,6 +1207,15 @@ export const exportTeamsExcel = async (req: Request, res: Response) => {
             .sort({ createdAt: -1 })
             .lean();
 
+        // Fetch idea submissions to get YouTube links per team
+        const ideaSubmissions = await IdeaSubmission.find({}, 'teamId youtubeVideoLink').lean();
+        const teamYoutubeMap: Record<string, string> = {};
+        for (const sub of ideaSubmissions) {
+            if (sub.teamId && sub.youtubeVideoLink) {
+                teamYoutubeMap[sub.teamId.toString()] = sub.youtubeVideoLink;
+            }
+        }
+
         // Build data rows
         const data: any[][] = [];
 
@@ -1193,7 +1225,8 @@ export const exportTeamsExcel = async (req: Request, res: Response) => {
             'Member 2 Name', 'Member 2 Email', 'Member 3 Name', 'Member 3 Email',
             'Member 4 Name', 'Member 4 Email', 'Member 5 Name', 'Member 5 Email',
             'Mentor Name', 'Mentor Email', 'Institute Name', 'Institute Code',
-            'District', 'State', 'Problem Statement', 'Problem Category', 'Status', 'Approved Date'
+            'District', 'State', 'Problem Statement', 'Problem Category',
+            'YouTube Video Link', 'Status', 'Approved Date'
         ]);
 
         let srNo = 1;
@@ -1242,6 +1275,7 @@ export const exportTeamsExcel = async (req: Request, res: Response) => {
                 team.spocState || '',
                 problem?.title || 'Not Selected',
                 problem?.type || 'N/A',
+                teamYoutubeMap[(team as any)._id?.toString()] || '',
                 team.status || '',
                 approvedDate
             ]);
@@ -1257,7 +1291,8 @@ export const exportTeamsExcel = async (req: Request, res: Response) => {
             { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
             { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
             { wch: 20 }, { wch: 30 }, { wch: 40 }, { wch: 15 },
-            { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 12 }, { wch: 12 }, { wch: 12 }
+            { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 12 },
+            { wch: 50 }, { wch: 12 }, { wch: 12 }
         ];
 
         XLSX.utils.book_append_sheet(wb, ws, 'Teams');

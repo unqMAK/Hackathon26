@@ -81,6 +81,9 @@ app.use('/api/faqs', faqRoutes);
 import videoRoutes from './routes/videoRoutes';
 app.use('/api/videos', videoRoutes);
 
+import ideaSubmissionRoutes from './routes/ideaSubmissionRoutes';
+app.use('/api/idea-submissions', ideaSubmissionRoutes);
+
 // Serve static certificates and uploads
 import path from 'path';
 app.use('/certificates', express.static(path.join(__dirname, '../public/certificates')));
