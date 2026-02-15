@@ -10,6 +10,7 @@ import {
     getSubmissionStats,
     reviewSubmission,
     downloadDocument,
+    allowResubmission,
     toggleSubmissionWindow,
     getSubmissionWindowStatus
 } from '../controllers/ideaSubmissionController';
@@ -55,6 +56,7 @@ router.get('/admin', protect, authorize('admin'), getAllSubmissions);
 router.get('/admin/stats', protect, authorize('admin'), getSubmissionStats);
 router.put('/admin/:id/review', protect, authorize('admin'), reviewSubmission);
 router.get('/admin/:id/download', protect, authorize('admin'), downloadDocument);
+router.delete('/admin/:id/allow-resubmission', protect, authorize('admin'), allowResubmission);
 router.post('/admin/toggle-submission', protect, authorize('admin'), toggleSubmissionWindow);
 router.get('/submission-status', getSubmissionWindowStatus);
 

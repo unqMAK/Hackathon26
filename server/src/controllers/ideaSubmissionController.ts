@@ -243,10 +243,8 @@ export const submitIdea = async (req: Request, res: Response) => {
             submittedBy: user._id
         });
 
-        // Clean up local file if successfully uploaded to Drive
-        if (driveFileId && fs.existsSync(file.path)) {
-            fs.unlinkSync(file.path);
-        }
+        // Keep local file regardless — admin may need to download it
+        // The local file is the source of truth for downloads
 
         res.status(201).json({ message: 'Idea submitted successfully!', submission });
     } catch (error: any) {
@@ -406,6 +404,32 @@ export const downloadDocument = async (req: Request, res: Response) => {
     } catch (error: any) {
         console.error('Download document error:', error);
         res.status(500).json({ message: 'Failed to download document', error: error.message });
+    }
+};
+
+// DELETE /api/idea-submissions/admin/:id/allow-resubmission - Allow team to resubmit
+export const allowResubmission = async (req: Request, res: Response) => {
+    try {
+        const submission = await IdeaSubmission.findById(req.params.id);
+        if (!submission) {
+            return res.status(404).json({ message: 'Submission not found' });
+        }
+
+        const teamId = submission.teamId;
+
+        // Delete the local file if it exists
+        if (submission.documentPath && fs.existsSync(submission.documentPath)) {
+            fs.unlinkSync(submission.documentPath);
+        }
+
+        // Delete the submission from DB
+        await IdeaSubmission.findByIdAndDelete(req.params.id);
+
+        console.log(`[Admin] Allowed resubmission for team ${teamId}`);
+        res.json({ message: 'Submission deleted. Team can now resubmit.' });
+    } catch (error: any) {
+        console.error('Allow resubmission error:', error);
+        res.status(500).json({ message: 'Failed to allow resubmission', error: error.message });
     }
 };
 

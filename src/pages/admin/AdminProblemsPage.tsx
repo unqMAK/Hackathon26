@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2, Pencil, Save, Video, X, Plus, Trash2, Lightbulb, CheckCircle, XCircle, Clock, ExternalLink, Eye, FileText, Youtube, Download } from 'lucide-react';
+import { Search, Users, Lock, Unlock, Mail, Phone, Building, Loader2, Pencil, Save, Video, X, Plus, Trash2, Lightbulb, CheckCircle, XCircle, Clock, ExternalLink, Eye, FileText, Youtube, Download, RefreshCcw } from 'lucide-react';
 import { useProblems } from '@/hooks/useMockData';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
@@ -360,6 +360,21 @@ const AdminProblemsPage = () => {
         },
         onError: (error: any) => {
             toast.error(error.response?.data?.message || 'Failed to toggle submission window');
+        }
+    });
+
+    const allowResubmissionMutation = useMutation({
+        mutationFn: async (id: string) => {
+            const res = await api.delete(`/idea-submissions/admin/${id}/allow-resubmission`);
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['adminIdeaSubmissions'] });
+            queryClient.invalidateQueries({ queryKey: ['adminIdeaStats'] });
+            toast.success(data.message);
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to allow resubmission');
         }
     });
 
@@ -1160,6 +1175,19 @@ const AdminProblemsPage = () => {
                                                                         disabled={sub.status === 'rejected' || reviewIdeaMutation.isPending}
                                                                     >
                                                                         <XCircle className="h-3 w-3 mr-1" /> Reject
+                                                                    </Button>
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="text-orange-700 hover:bg-orange-50 border-orange-300"
+                                                                        onClick={() => {
+                                                                            if (confirm(`Allow team "${sub.teamId?.name || 'Unknown'}" to resubmit? This will delete their current submission.`)) {
+                                                                                allowResubmissionMutation.mutate(sub._id);
+                                                                            }
+                                                                        }}
+                                                                        disabled={allowResubmissionMutation.isPending}
+                                                                    >
+                                                                        <RefreshCcw className="h-3 w-3 mr-1" /> Resubmit
                                                                     </Button>
                                                                 </div>
                                                             </TableCell>
