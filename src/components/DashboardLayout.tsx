@@ -26,11 +26,39 @@ import { getCurrentUser, logout } from '@/lib/mockAuth';
 import { toast } from 'sonner';
 import logoImg from '@/assets/mit-vpu-logo-dashboard.png';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { useMyTeam } from '@/hooks/useTeam';
 
 interface DashboardLayoutProps {
   children: ReactNode;
   role: string;
 }
+
+// Gate: blocks student content when team is disabled
+const TeamDisabledGate = ({ role, children }: { role: string; children: ReactNode }) => {
+  const { data: myTeam } = useMyTeam();
+
+  // Only gate student role
+  if (role === 'student' && myTeam?.isDisabled) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+        <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-10 max-w-lg">
+          <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-600"><circle cx="12" cy="12" r="10" /><path d="m4.9 4.9 14.2 14.2" /></svg>
+          </div>
+          <h2 className="text-2xl font-bold text-red-800 mb-2">Team Disabled</h2>
+          <p className="text-red-600 mb-4">
+            Your team has been disabled by an administrator. All activities on this platform are currently blocked.
+          </p>
+          <p className="text-sm text-red-500">
+            Please contact your SPOC or the hackathon organizers for more information.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
 
 const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -214,7 +242,9 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
 
         {/* Page Content */}
         <main className="p-4 sm:p-6 lg:p-8">
-          {children}
+          <TeamDisabledGate role={role}>
+            {children}
+          </TeamDisabledGate>
         </main>
       </div>
     </div>

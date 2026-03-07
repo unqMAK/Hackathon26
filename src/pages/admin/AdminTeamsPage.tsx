@@ -205,12 +205,19 @@ const TeamTable = ({ teams, onRowClick, isLoading }: { teams: any[], onRowClick:
                         {new Date(team.createdAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                        <Badge
-                            variant={team.status === 'approved' ? 'default' : team.status === 'rejected' ? 'destructive' : 'secondary'}
-                            className="capitalize"
-                        >
-                            {team.status}
-                        </Badge>
+                        <div className="flex items-center gap-1.5">
+                            <Badge
+                                variant={team.status === 'approved' ? 'default' : team.status === 'rejected' ? 'destructive' : 'secondary'}
+                                className="capitalize"
+                            >
+                                {team.status}
+                            </Badge>
+                            {team.isDisabled && (
+                                <Badge variant="destructive" className="bg-red-600 text-white text-[10px]">
+                                    Disabled
+                                </Badge>
+                            )}
+                        </div>
                     </TableCell>
                 </TableRow>
             ))}

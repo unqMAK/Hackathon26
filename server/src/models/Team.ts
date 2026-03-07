@@ -36,6 +36,7 @@ export interface ITeam extends Document {
     rejectedAt?: Date;
     requestSent: boolean;
     requestedAt?: Date;
+    isDisabled?: boolean;
 }
 
 const TeamSchema: Schema = new Schema({
@@ -77,7 +78,8 @@ const TeamSchema: Schema = new Schema({
     approvedAt: { type: Date },
     rejectedAt: { type: Date },
     requestSent: { type: Boolean, default: false },
-    requestedAt: { type: Date }
+    requestedAt: { type: Date },
+    isDisabled: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

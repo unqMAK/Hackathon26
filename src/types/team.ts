@@ -33,6 +33,7 @@ export interface Team {
     requestedAt?: string;
     spocNotes?: string;
     createdAt: string;
+    isDisabled?: boolean;
     updatedAt: string;
 }
 

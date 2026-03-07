@@ -9,6 +9,7 @@ import {
     rejectGovernanceTeam,
     getAdminPendingTeams,
     deleteTeam,
+    toggleTeamDisabled,
     getPasswordResetRequests,
     approvePasswordReset,
     rejectPasswordReset,
@@ -36,6 +37,7 @@ router.get('/pending-teams', protect, authorize('admin'), getAdminPendingTeams);
 router.put('/approve-team/:teamId', protect, authorize('admin'), approveGovernanceTeam);
 router.put('/reject-team/:teamId', protect, authorize('admin'), rejectGovernanceTeam);
 router.delete('/teams/:teamId', protect, authorize('admin'), deleteTeam);
+router.put('/teams/:teamId/toggle-disabled', protect, authorize('admin'), toggleTeamDisabled);
 
 // Password Reset Management Routes
 router.get('/password-reset-requests', protect, authorize('admin'), getPasswordResetRequests);

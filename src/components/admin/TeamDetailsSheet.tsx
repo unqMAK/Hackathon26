@@ -26,7 +26,9 @@ import {
     MessageSquare,
     ShieldAlert,
     AlertCircle,
-    Copy
+    Copy,
+    Ban,
+    Power
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getTeamDetails } from "@/services/mentorService";
@@ -75,6 +77,16 @@ export const TeamDetailsSheet = ({ teamId, open, onOpenChange }: TeamDetailsShee
             setShowRejectForm(false);
         },
         onError: (err: any) => toast.error(err.response?.data?.message || "Rejection failed")
+    });
+
+    const toggleDisabledMutation = useMutation({
+        mutationFn: (id: string) => adminService.toggleTeamDisabled(id),
+        onSuccess: (response: any) => {
+            toast.success(response.message);
+            queryClient.invalidateQueries({ queryKey: ['teamDetails'] });
+            queryClient.invalidateQueries({ queryKey: ['teams'] });
+        },
+        onError: (err: any) => toast.error(err.response?.data?.message || "Toggle failed")
     });
 
     const team: Team = data?.team;
@@ -218,6 +230,17 @@ export const TeamDetailsSheet = ({ teamId, open, onOpenChange }: TeamDetailsShee
                                         <Badge variant="outline" className="bg-white">Ref: {team._id.slice(-6).toUpperCase()}</Badge>
                                     </div>
                                 </div>
+
+                                {/* Disabled Warning Banner */}
+                                {team.isDisabled && (
+                                    <div className="bg-red-50 border-2 border-red-300 p-4 rounded-lg flex items-start gap-3">
+                                        <Ban className="h-5 w-5 text-red-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="font-bold text-red-800">Team Disabled</p>
+                                            <p className="text-sm text-red-600">This team is currently disabled. All website activities are blocked for team members.</p>
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Consent Letter Review */}
                                 <Card className="border-blue-200 bg-blue-50/50 shadow-none">
@@ -370,6 +393,31 @@ export const TeamDetailsSheet = ({ teamId, open, onOpenChange }: TeamDetailsShee
                                         </div>
                                     </div>
                                 )}
+                            </SheetFooter>
+                        )}
+
+                        {/* Disable/Enable Button for approved teams */}
+                        {team.status === 'approved' && (
+                            <SheetFooter className="p-6 border-t bg-slate-50/80">
+                                <Button
+                                    className={`w-full ${team.isDisabled ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
+                                    size="lg"
+                                    onClick={() => {
+                                        if (confirm(`${team.isDisabled ? 'Enable' : 'Disable'} team "${team.name}"? ${!team.isDisabled ? 'All website activities will be blocked for this team.' : 'Team will regain access to all website features.'}`)) {
+                                            toggleDisabledMutation.mutate(team._id);
+                                        }
+                                    }}
+                                    disabled={toggleDisabledMutation.isPending}
+                                >
+                                    {toggleDisabledMutation.isPending ? (
+                                        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                                    ) : team.isDisabled ? (
+                                        <Power className="w-4 h-4 mr-2" />
+                                    ) : (
+                                        <Ban className="w-4 h-4 mr-2" />
+                                    )}
+                                    {team.isDisabled ? 'Enable Team' : 'Disable Team'}
+                                </Button>
                             </SheetFooter>
                         )}
                     </>

@@ -16,6 +16,11 @@ export const adminService = {
         return data;
     },
 
+    toggleTeamDisabled: async (teamId: string): Promise<any> => {
+        const { data } = await api.put(`/admin/teams/${teamId}/toggle-disabled`);
+        return data;
+    },
+
     // User management
     getUsers: async (): Promise<any[]> => {
         const { data } = await api.get('/users');

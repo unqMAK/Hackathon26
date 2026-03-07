@@ -612,6 +612,27 @@ export const deleteTeam = async (req: Request, res: Response) => {
     }
 };
 
+// Governance: Toggle Team Disabled Status
+export const toggleTeamDisabled = async (req: Request, res: Response) => {
+    const { teamId } = req.params;
+    try {
+        const team = await Team.findById(teamId);
+        if (!team) return res.status(404).json({ message: 'Team not found' });
+
+        team.isDisabled = !team.isDisabled;
+        await team.save();
+
+        console.log(`Team ${team.name} ${team.isDisabled ? 'DISABLED' : 'ENABLED'} by admin`);
+        res.json({
+            message: `Team "${team.name}" has been ${team.isDisabled ? 'disabled' : 'enabled'}`,
+            isDisabled: team.isDisabled
+        });
+    } catch (error: any) {
+        console.error('Toggle Team Disabled Error:', error);
+        res.status(500).json({ message: error.message || 'Server Error' });
+    }
+};
+
 // Get Pending Teams for Admin (From PendingTable)
 export const getAdminPendingTeams = async (req: Request, res: Response) => {
     try {
