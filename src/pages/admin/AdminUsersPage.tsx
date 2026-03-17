@@ -287,6 +287,36 @@ const AdminUsersPage = () => {
         }
     };
 
+    const downloadShortlistedCSV = async () => {
+        setIsDownloading(true);
+        try {
+            const response = await api.get('/admin/export/shortlisted-teams', { responseType: 'blob' });
+            const blob = new Blob([response.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `shortlisted_teams_phase2_${new Date().toISOString().replace(/[:.]/g, '-')}.csv`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="(.+)"/);
+                if (match) filename = match[1];
+            }
+
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Shortlisted teams report exported successfully');
+        } catch (error: any) {
+            console.error('Error downloading shortlisted CSV:', error);
+            toast.error(error?.response?.data?.message || 'Failed to download shortlisted teams report');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     return (
         <DashboardLayout role="admin">
@@ -325,6 +355,16 @@ const AdminUsersPage = () => {
                         >
                             <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
                             {isDownloading ? 'Downloading...' : 'Export Excel'}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={downloadShortlistedCSV}
+                            disabled={isDownloading}
+                            title="Download shortlisted (enabled) teams with YouTube links for reviewers"
+                            className="bg-blue-50 hover:bg-blue-100 border-blue-200"
+                        >
+                            <Download className="mr-2 h-4 w-4 text-blue-600" />
+                            {isDownloading ? 'Downloading...' : 'Shortlisted Teams'}
                         </Button>
 
                         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

@@ -21,7 +21,8 @@ import {
     setProblemSelectionLock,
     getTeamSelections,
     getRegistrationOpen,
-    setRegistrationOpen
+    setRegistrationOpen,
+    exportShortlistedTeamsCSV
 } from '../controllers/adminController';
 
 const router = express.Router();
@@ -49,6 +50,7 @@ router.post('/reset-user-password', protect, authorize('admin'), adminResetUserP
 router.get('/export/teams-flat', protect, authorize('admin'), exportTeamsCSVFlat);
 router.get('/export/teams-structured', protect, authorize('admin'), exportTeamsCSVStructured);
 router.get('/export/teams-excel', protect, authorize('admin'), exportTeamsExcel);
+router.get('/export/shortlisted-teams', protect, authorize('admin'), exportShortlistedTeamsCSV);
 
 // Team Selections & Settings Routes
 router.get('/team-selections', protect, authorize('admin'), getTeamSelections);

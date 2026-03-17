@@ -1373,3 +1373,139 @@ export const setRegistrationOpen = async (req: Request, res: Response) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+// ==================== SHORTLISTED TEAMS EXPORT ====================
+export const exportShortlistedTeamsCSV = async (req: Request, res: Response) => {
+    try {
+        // Get only enabled (shortlisted) approved teams
+        const teams = await Team.find({
+            status: 'approved',
+            $or: [{ isDisabled: false }, { isDisabled: { $exists: false } }]
+        })
+            .populate('leaderId', 'name email phone')
+            .populate('members', 'name email phone')
+            .populate('problemId', 'title category type')
+            .sort({ name: 1 })
+            .lean();
+
+        // Get idea submissions for these teams
+        const teamIds = teams.map((t: any) => t._id);
+        const ideaSubmissions = await IdeaSubmission.find({ teamId: { $in: teamIds } }).lean();
+        const submissionMap: Record<string, any> = {};
+        for (const sub of ideaSubmissions) {
+            if (sub.teamId) {
+                submissionMap[sub.teamId.toString()] = sub;
+            }
+        }
+
+        const escapeCSV = (value: string) => {
+            if (!value) return '';
+            if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+                return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value;
+        };
+
+        const headers = [
+            'Sr.No',
+            'Team Name',
+            'Institute Name',
+            'Institute Code',
+            'District',
+            'State',
+            'Problem Statement',
+            'Problem Category',
+            'YouTube Video Link',
+            'Submission Status',
+            'Document Name',
+            'Submitted On',
+            'Leader Name',
+            'Leader Email',
+            'Leader Phone',
+            'Member 2 Name',
+            'Member 2 Email',
+            'Member 3 Name',
+            'Member 3 Email',
+            'Member 4 Name',
+            'Member 4 Email',
+            'Member 5 Name',
+            'Member 5 Email',
+            'Mentor Name',
+            'Mentor Email',
+            'SPOC Name',
+            'SPOC Email'
+        ];
+
+        const rows: string[][] = [];
+        let srNo = 1;
+
+        for (const team of teams) {
+            const leader = team.leaderId as any;
+            const members = (team.members as any[]) || [];
+            const problem = team.problemId as any;
+            const submission = submissionMap[(team as any)._id?.toString()];
+
+            const otherMembers = members.filter(m =>
+                m._id?.toString() !== leader?._id?.toString()
+            );
+            const pendingMembers = team.pendingMembers || [];
+            const allOtherMembers: { name: string; email: string }[] = [
+                ...otherMembers.map((m: any) => ({ name: m.name || '', email: m.email || '' })),
+                ...pendingMembers.map(p => ({ name: p.name || '', email: p.email || '' }))
+            ];
+            while (allOtherMembers.length < 4) {
+                allOtherMembers.push({ name: '', email: '' });
+            }
+
+            const submittedDate = submission?.createdAt
+                ? new Date(submission.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                : '';
+
+            rows.push([
+                String(srNo++),
+                team.name || '',
+                team.instituteName || '',
+                team.instituteCode || '',
+                team.spocDistrict || '',
+                team.spocState || '',
+                problem?.title || 'Not Selected',
+                problem?.type || '',
+                submission?.youtubeVideoLink || 'NOT SUBMITTED',
+                submission?.status || 'NOT SUBMITTED',
+                submission?.documentOriginalName || '',
+                submittedDate,
+                leader?.name || '',
+                leader?.email || '',
+                leader?.phone || 'N/A',
+                allOtherMembers[0]?.name || '',
+                allOtherMembers[0]?.email || '',
+                allOtherMembers[1]?.name || '',
+                allOtherMembers[1]?.email || '',
+                allOtherMembers[2]?.name || '',
+                allOtherMembers[2]?.email || '',
+                allOtherMembers[3]?.name || '',
+                allOtherMembers[3]?.email || '',
+                team.mentorName || '',
+                team.mentorEmail || '',
+                team.spocName || '',
+                team.spocEmail || ''
+            ]);
+        }
+
+        const csvContent = [
+            headers.map(escapeCSV).join(','),
+            ...rows.map(row => row.map(escapeCSV).join(','))
+        ].join('\n');
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `shortlisted_teams_phase2_${timestamp}.csv`;
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send('\ufeff' + csvContent); // BOM for Excel
+
+    } catch (error) {
+        console.error('Error exporting shortlisted teams CSV:', error);
+        res.status(500).json({ message: 'Server error while exporting shortlisted teams' });
+    }
+};
