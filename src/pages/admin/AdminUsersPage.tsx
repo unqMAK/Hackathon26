@@ -318,6 +318,39 @@ const AdminUsersPage = () => {
         }
     };
 
+    const downloadShortlistedExcel = async () => {
+        setIsDownloading(true);
+        try {
+            const response = await api.get('/admin/export/shortlisted-teams-excel', { responseType: 'blob' });
+            const blob = new Blob([response.data], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+
+            const contentDisposition = response.headers['content-disposition'];
+            let filename = `shortlisted_teams_phase2_${new Date().toISOString().replace(/[:.]/g, '-')}.xlsx`;
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="(.+)"/);
+                if (match) filename = match[1];
+            }
+
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            toast.success('Shortlisted teams Excel exported successfully');
+        } catch (error: any) {
+            console.error('Error downloading shortlisted Excel:', error);
+            toast.error(error?.response?.data?.message || 'Failed to download shortlisted teams Excel');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     return (
         <DashboardLayout role="admin">
             <div className="space-y-6">
@@ -360,11 +393,21 @@ const AdminUsersPage = () => {
                             variant="outline"
                             onClick={downloadShortlistedCSV}
                             disabled={isDownloading}
-                            title="Download shortlisted (enabled) teams with YouTube links for reviewers"
+                            title="Download shortlisted teams as CSV with YouTube links"
                             className="bg-blue-50 hover:bg-blue-100 border-blue-200"
                         >
                             <Download className="mr-2 h-4 w-4 text-blue-600" />
-                            {isDownloading ? 'Downloading...' : 'Shortlisted Teams'}
+                            {isDownloading ? 'Downloading...' : 'Shortlisted CSV'}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={downloadShortlistedExcel}
+                            disabled={isDownloading}
+                            title="Download shortlisted teams as Excel with YouTube links"
+                            className="bg-teal-50 hover:bg-teal-100 border-teal-200"
+                        >
+                            <FileSpreadsheet className="mr-2 h-4 w-4 text-teal-600" />
+                            {isDownloading ? 'Downloading...' : 'Shortlisted Excel'}
                         </Button>
 
                         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

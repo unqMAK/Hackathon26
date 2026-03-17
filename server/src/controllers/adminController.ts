@@ -1509,3 +1509,120 @@ export const exportShortlistedTeamsCSV = async (req: Request, res: Response) => 
         res.status(500).json({ message: 'Server error while exporting shortlisted teams' });
     }
 };
+
+// ==================== SHORTLISTED TEAMS EXCEL EXPORT ====================
+export const exportShortlistedTeamsExcel = async (req: Request, res: Response) => {
+    try {
+        const teams = await Team.find({
+            status: 'approved',
+            $or: [{ isDisabled: false }, { isDisabled: { $exists: false } }]
+        })
+            .populate('leaderId', 'name email phone')
+            .populate('members', 'name email phone')
+            .populate('problemId', 'title category type')
+            .sort({ name: 1 })
+            .lean();
+
+        const teamIds = teams.map((t: any) => t._id);
+        const ideaSubmissions = await IdeaSubmission.find({ teamId: { $in: teamIds } }).lean();
+        const submissionMap: Record<string, any> = {};
+        for (const sub of ideaSubmissions) {
+            if (sub.teamId) {
+                submissionMap[sub.teamId.toString()] = sub;
+            }
+        }
+
+        const data: any[][] = [];
+        data.push([
+            'Sr.No', 'Team Name', 'Institute Name', 'Institute Code',
+            'District', 'State', 'Problem Statement', 'Problem Category',
+            'YouTube Video Link', 'Submission Status', 'Document Name', 'Submitted On',
+            'Leader Name', 'Leader Email', 'Leader Phone',
+            'Member 2 Name', 'Member 2 Email', 'Member 3 Name', 'Member 3 Email',
+            'Member 4 Name', 'Member 4 Email', 'Member 5 Name', 'Member 5 Email',
+            'Mentor Name', 'Mentor Email', 'SPOC Name', 'SPOC Email'
+        ]);
+
+        let srNo = 1;
+        for (const team of teams) {
+            const leader = team.leaderId as any;
+            const members = (team.members as any[]) || [];
+            const problem = team.problemId as any;
+            const submission = submissionMap[(team as any)._id?.toString()];
+
+            const otherMembers = members.filter(m =>
+                m._id?.toString() !== leader?._id?.toString()
+            );
+            const pendingMembers = team.pendingMembers || [];
+            const allOtherMembers: { name: string; email: string }[] = [
+                ...otherMembers.map((m: any) => ({ name: m.name || '', email: m.email || '' })),
+                ...pendingMembers.map(p => ({ name: p.name || '', email: p.email || '' }))
+            ];
+            while (allOtherMembers.length < 4) {
+                allOtherMembers.push({ name: '', email: '' });
+            }
+
+            const submittedDate = submission?.createdAt
+                ? new Date(submission.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+                : '';
+
+            data.push([
+                srNo++,
+                team.name || '',
+                team.instituteName || '',
+                team.instituteCode || '',
+                team.spocDistrict || '',
+                team.spocState || '',
+                problem?.title || 'Not Selected',
+                problem?.type || '',
+                submission?.youtubeVideoLink || 'NOT SUBMITTED',
+                submission?.status || 'NOT SUBMITTED',
+                submission?.documentOriginalName || '',
+                submittedDate,
+                leader?.name || '',
+                leader?.email || '',
+                leader?.phone || 'N/A',
+                allOtherMembers[0]?.name || '',
+                allOtherMembers[0]?.email || '',
+                allOtherMembers[1]?.name || '',
+                allOtherMembers[1]?.email || '',
+                allOtherMembers[2]?.name || '',
+                allOtherMembers[2]?.email || '',
+                allOtherMembers[3]?.name || '',
+                allOtherMembers[3]?.email || '',
+                team.mentorName || '',
+                team.mentorEmail || '',
+                team.spocName || '',
+                team.spocEmail || ''
+            ]);
+        }
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        ws['!cols'] = [
+            { wch: 6 }, { wch: 25 }, { wch: 40 }, { wch: 12 },
+            { wch: 15 }, { wch: 15 }, { wch: 50 }, { wch: 12 },
+            { wch: 50 }, { wch: 15 }, { wch: 30 }, { wch: 20 },
+            { wch: 20 }, { wch: 30 }, { wch: 12 },
+            { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
+            { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 },
+            { wch: 20 }, { wch: 30 }, { wch: 20 }, { wch: 30 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, 'Shortlisted Teams');
+
+        const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `shortlisted_teams_phase2_${timestamp}.xlsx`;
+
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+        res.send(buffer);
+
+    } catch (error) {
+        console.error('Error exporting shortlisted teams Excel:', error);
+        res.status(500).json({ message: 'Server error while exporting shortlisted teams Excel' });
+    }
+};

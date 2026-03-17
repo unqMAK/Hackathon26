@@ -22,7 +22,8 @@ import {
     getTeamSelections,
     getRegistrationOpen,
     setRegistrationOpen,
-    exportShortlistedTeamsCSV
+    exportShortlistedTeamsCSV,
+    exportShortlistedTeamsExcel
 } from '../controllers/adminController';
 
 const router = express.Router();
@@ -51,6 +52,7 @@ router.get('/export/teams-flat', protect, authorize('admin'), exportTeamsCSVFlat
 router.get('/export/teams-structured', protect, authorize('admin'), exportTeamsCSVStructured);
 router.get('/export/teams-excel', protect, authorize('admin'), exportTeamsExcel);
 router.get('/export/shortlisted-teams', protect, authorize('admin'), exportShortlistedTeamsCSV);
+router.get('/export/shortlisted-teams-excel', protect, authorize('admin'), exportShortlistedTeamsExcel);
 
 // Team Selections & Settings Routes
 router.get('/team-selections', protect, authorize('admin'), getTeamSelections);
