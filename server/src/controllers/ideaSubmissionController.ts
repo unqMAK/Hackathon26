@@ -197,6 +197,14 @@ export const submitIdea = async (req: Request, res: Response) => {
             return res.status(400).json({ message: 'You must be part of an approved team' });
         }
 
+        // Check if team is disabled
+        if (team.isDisabled) {
+            if (file.path && fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+            }
+            return res.status(403).json({ message: 'Your team has been disabled. Submissions are not allowed.' });
+        }
+
         // Only team leader can submit
         if (team.leaderId.toString() !== user._id.toString()) {
             return res.status(403).json({ message: 'Only the team leader can submit ideas' });
