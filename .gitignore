@@ -36,3 +36,12 @@ dist/
 server/.env
 server/.env.*
 _backup_local/
+client_secret_*.json
+server/client_secret_*.json
+server/mithackathon26-*.json
+*.xlsx
+.~lock.*
+admin_idea_tab.png
+get_prod_stats.sh
+server/exports/
+server/uploads/ideas/

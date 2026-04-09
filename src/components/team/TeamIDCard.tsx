@@ -118,7 +118,7 @@ const TeamIDCard = ({ team }: TeamIDCardProps) => {
 
                                 <div className="flex items-center justify-center gap-2 mb-1">
                                     <Sparkles className="h-4 w-4 text-yellow-300" />
-                                    <span className="text-xs font-bold text-white/90 tracking-widest uppercase">HackSphere 2025</span>
+                                    <span className="text-xs font-bold text-white/90 tracking-widest uppercase">SAMVED 2026</span>
                                     <Sparkles className="h-4 w-4 text-yellow-300" />
                                 </div>
                                 <h1 className="text-xl font-black text-white tracking-tight">{team.name}</h1>

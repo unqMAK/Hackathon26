@@ -41,7 +41,7 @@ const MemberIDCard = ({ member, team, isLeader }: MemberIDCardProps) => {
             });
 
             const link = document.createElement('a');
-            link.download = `${member.name.replace(/\s+/g, '_')}_HackSphere_ID.png`;
+            link.download = `${member.name.replace(/\s+/g, '_')}_SAMVED_ID.png`;
             link.href = dataUrl;
             link.click();
 
@@ -93,7 +93,7 @@ const MemberIDCard = ({ member, team, isLeader }: MemberIDCardProps) => {
 
                     <div className="flex items-center justify-center gap-1">
                         <Sparkles className="h-3 w-3 text-yellow-300" />
-                        <span className="text-[10px] font-bold text-white/90 tracking-widest uppercase">HackSphere 2025</span>
+                        <span className="text-[10px] font-bold text-white/90 tracking-widest uppercase">SAMVED 2026</span>
                         <Sparkles className="h-3 w-3 text-yellow-300" />
                     </div>
                 </div>

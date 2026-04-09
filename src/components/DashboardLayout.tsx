@@ -20,7 +20,8 @@ import {
   Timer,
   Megaphone,
   Calendar,
-  Key
+  Key,
+  CreditCard
 } from 'lucide-react';
 import { getCurrentUser, logout } from '@/lib/mockAuth';
 import { toast } from 'sonner';
@@ -102,6 +103,7 @@ const DashboardLayout = ({ children, role }: DashboardLayoutProps) => {
           { icon: Settings, label: 'Settings', path: '/admin/settings' },
           { icon: Award, label: 'Certificates', path: '/admin/certificates/builder' },
           { icon: FileText, label: 'Generate Certs', path: '/admin/certificates/generate' },
+          { icon: CreditCard, label: 'ID Cards', path: '/admin/id-cards' },
         ];
       case 'spoc':
         return [
